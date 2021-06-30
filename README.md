@@ -2,17 +2,17 @@
  Projek ini hanya untuk pengembangan saya pribadi
 
 # KenzoMcW
-![GitHub Repo stars](https://img.shields.io/github/stars/breakdowns/slam-mirrorbot?color=blue&style=flat)
-![GitHub forks](https://img.shields.io/github/forks/breakdowns/slam-mirrorbot?color=green&style=flat)
-![GitHub issues](https://img.shields.io/github/issues/breakdowns/slam-mirrorbot)
-![GitHub closed issues](https://img.shields.io/github/issues-closed/breakdowns/slam-mirrorbot)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/breakdowns/slam-mirrorbot)
-![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/breakdowns/slam-mirrorbot)
-![GitHub contributors](https://img.shields.io/github/contributors/breakdowns/slam-mirrorbot?style=flat)
-![GitHub repo size](https://img.shields.io/github/repo-size/breakdowns/slam-mirrorbot?color=red)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/breakdowns/slam-mirrorbot)
-![GitHub](https://img.shields.io/github/license/breakdowns/slam-mirrorbot)
-[![Slam Mirror Support](https://img.shields.io/badge/slam%20mirror%20bot-support%20group-blue)](https://t.me/SlamMirrorSupport)
+![GitHub Repo stars](https://img.shields.io/github/stars/XZE-WOLF/KenzoMcW?color=blue&style=flat)
+![GitHub forks](https://img.shields.io/github/forks/XZE-WOLF/KenzoMcW?color=green&style=flat)
+![GitHub issues](https://img.shields.io/github/issues/XZE-WOLF/KenzoMcW)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/XZE-WOLF/KenzoMcW)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/XZE-WOLF/KenzoMcW)
+![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/XZE-WOLF/KenzoMcW)
+![GitHub contributors](https://img.shields.io/github/contributors/XZE-WOLF/KenzoMcW?style=flat)
+![GitHub repo size](https://img.shields.io/github/repo-size/XZE-WOLF/KenzoMcW?color=red)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/XZE-WOLF/KenzoMcW)
+![GitHub](https://img.shields.io/github/license/XZE-WOLF/KenzoMcW)
+[![Slam Mirror Support](https://img.shields.io/badge/kenzo%20mcw%20bot-link%20group-blue)](https://t.me/kenzomcwbot)
 
 **KenzoMcW** is a _multipurpose_ Telegram Bot writen in Python for mirroring files on the Internet to our beloved Google Drive.
 
