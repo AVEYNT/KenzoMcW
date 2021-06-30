@@ -19,6 +19,7 @@ from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_tim
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from bot.modules import ALL_MODULES
+from bot.helper.misc import paginate_modules
 
 now=datetime.now(pytz.timezone('Asia/Jakarta'))
 
