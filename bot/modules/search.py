@@ -326,7 +326,7 @@ def searchhelp(update, context):
     update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
     
     
-_help__ = """
+__help__ = """
 ┎─────┨ ⚙ Tools ┠─────┒
 │ ❖ /speed : test internet server
 │ ❖ /tshelp : torrent search
