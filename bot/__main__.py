@@ -335,12 +335,8 @@ def main():
     help_callback_handler = CallbackQueryHandler(
         help_button, pattern=r"help_", run_async=True
     )
-    help_staff_handler = CommandHandler(
-        "staffhelp",
-        staff_help,
-        filters=CustomFilters.support_filter,
-        run_async=True,
-    )
+    help_staff_handler = CommandHandler("staffhelp", staff_help,
+        filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
     stats_handler = CommandHandler(BotCommands.StatsCommand,
                                    stats, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
     log_handler = CommandHandler(BotCommands.LogCommand, log, filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
