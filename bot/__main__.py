@@ -208,8 +208,12 @@ def start(update, context):
                 timeout=60,
             )
     else:
-        update.effective_message.reply_text(
-            "Sending you a warm hi & wishing your day is a happy one!"
+        update.effective_message.reply_photo(
+            IMAGE_URL,
+            PM_START_TEXT,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=ParseMode.MARKDOWN,
+            timeout=60,
         )
 
 
@@ -287,7 +291,7 @@ def help_button(update, context):
                 keyb += [
                     [
                         InlineKeyboardButton(
-                            text="Staff", callback_data="help_staff"
+                            text="👤Owner", callback_data="help_staff"
                         )
                     ]
                 ]
@@ -356,7 +360,7 @@ def get_help(update, context):
                 [
                     [
                         InlineKeyboardButton(
-                            text="Help",
+                            text="⚙️Help",
                             url="t.me/{}?start=help".format(
                                 context.bot.username
                             ),
@@ -398,7 +402,7 @@ def get_help(update, context):
             keyb += [
                 [
                     InlineKeyboardButton(
-                        text="Staff", callback_data="help_staff"
+                        text="👤Owner", callback_data="help_staff"
                     )
                 ]
             ]
