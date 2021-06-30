@@ -8,6 +8,7 @@ import requests
 from bot import dispatcher
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update, Message
 from telegram.ext import CallbackContext, CommandHandler
+from bot.helper.telegram_helper.filters import CustomFilters
 
 info_btn = "More Information"
 kaizoku_btn = "Kaizoku ☠️"
@@ -552,7 +553,7 @@ MANGA_HANDLER = CommandHandler("manga", manga, filters=CustomFilters.authorized_
 USER_HANDLER = CommandHandler("user", user, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 UPCOMING_HANDLER = CommandHandler("upcoming", upcoming, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 KAIZOKU_SEARCH_HANDLER = CommandHandler("kaizoku", kaizoku, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
-KAYO_SEARCH_HANDLER = CommandHandler("kayo", kayo,filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+KAYO_SEARCH_HANDLER = CommandHandler("kayo", kayo, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 
 dispatcher.add_handler(ANIME_HANDLER)
 dispatcher.add_handler(CHARACTER_HANDLER)
