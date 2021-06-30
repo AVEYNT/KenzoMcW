@@ -11,16 +11,37 @@ import time
 
 from telegram import ParseMode, BotCommand
 from telegram.ext import CommandHandler
-from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS
+from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS, OWNER_ID
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, search, delete, speedtest, usage, mediainfo, count, config, updates
+from bot.modules import ALL_MODULES
 
 now=datetime.now(pytz.timezone('Asia/Jakarta'))
+
+
+HELP_STRINGS = f"""
+Hello there! My name is *{dispatcher.bot.first_name}*.
+I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
+the things I can help you with.
+*Main* commands available:
+ × /start: Starts me, can be used to check i'm alive or no...
+ × /help: PM's you this message.
+ × /help <module name>: PM's you info about that module.
+ × /settings: in PM: will send you your settings for all supported modules.
+   - in a group: will redirect you to pm, with all that chat's settings.
+ \nClick on the buttons below to get documentation about specific modules!"""
+
+
+STAFF_HELP_STRINGS = """Hey there staff users. Nice to see you :)
+Here is all the staff's commands. Users above has the command access for all commands below.
+*OWNER*
+× /broadcast: Send a broadcast message to all chat that i'm currently in.
+× /staffids: Get all staff's you have.
+× /ip: Sends the bot's IP address to ssh in if necessary (PM only)."""
 
 
 def stats(update, context):
@@ -54,7 +75,7 @@ This bot can mirror all your links to Google Drive!
 Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
     buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Help", "t.me/{dispatcher.bot.username}?start=help")
+    buttons.buildbutton("Help", "t.me/kenzomcwbot?start=help")
     buttons.buildbutton("My Master", "https://t.me/XEROZERO11")
     reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
     LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
@@ -89,97 +110,189 @@ def log(update, context):
     sendLogFile(context.bot, update)
 
 
-def bot_help(update, context):
-    help_string_adm = f'''
-/{BotCommands.HelpCommand}: To get this message
+# do not async
+def send_help(chat_id, text, keyboard=None):
+    if not keyboard:
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
+    dispatcher.bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=keyboard,
+    )
 
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive.
 
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
+def help_button(update, context):
+    query = update.callback_query
+    user = update.effective_user
+    mod_match = re.match(r"help_module\((.+?)\)", query.data)
+    staff_match = re.match(r"help_staff", query.data)
+    back_match = re.match(r"help_back", query.data)
+    try:
+        if mod_match:
+            module = mod_match.group(1)
+            text = (
+                "Here is the help for the *{}* module:\n".format(
+                    HELPABLE[module].__mod_name__
+                )
+                + HELPABLE[module].__help__
+            )
+            query.message.edit_text(
+                text=text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text="⬅️ Back", callback_data="help_back"
+                            )
+                        ]
+                    ]
+                ),
+            )
 
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
+        elif staff_match:
+            query.message.edit_text(
+                text=STAFF_HELP_STRINGS,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text="⬅️ Back", callback_data="help_back"
+                            )
+                        ]
+                    ]
+                ),
+            )
 
-/{BotCommands.CloneCommand}: Copy file/folder to Google Drive
+        elif back_match:
+            keyb = paginate_modules(0, HELPABLE, "help")
+            # Add aditional button if staff user detected
+            if (
+                user.id in OWNER_ID
+            ):
+                keyb += [
+                    [
+                        InlineKeyboardButton(
+                            text="Staff", callback_data="help_staff"
+                        )
+                    ]
+                ]
 
-/{BotCommands.CountCommand}: Count file/folder of Google Drive Links
+            query.message.edit_text(
+                text=HELP_STRINGS,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(keyb),
+            )
 
-/{BotCommands.DeleteCommand} [link]: Delete file from Google Drive (Only Owner & Sudo)
+        # ensure no spinny white circle
+        context.bot.answer_callback_query(query.id)
+    except Exception as excp:
+        if excp.message == "Message is not modified":
+            pass
+        elif excp.message == "Query_id_invalid":
+            pass
+        elif excp.message == "Message can't be deleted":
+            pass
+        else:
+            query.message.edit_text(excp.message)
+            LOGGER.exception("Exception in help buttons. %s", str(query.data))
 
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help.
 
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
+def staff_help(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
 
-/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
+    if chat.type != chat.PRIVATE:
+        update.effective_message.reply_text(
+            "Contact me in PM to get the list of staff's command"
+        )
+        return
 
-/{BotCommands.StatusCommand}: Shows a status of all the downloads
-
-/{BotCommands.ListCommand} [search term]: Searches the search term in the Google Drive, if found replies with the link
-
-/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
-
-/{BotCommands.AuthorizeCommand}: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-
-/{BotCommands.UnAuthorizeCommand}: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-
-/{BotCommands.AuthorizedUsersCommand}: Show authorized users (Only Owner & Sudo)
-
-/{BotCommands.AddSudoCommand}: Add sudo user (Only Owner)
-
-/{BotCommands.RmSudoCommand}: Remove sudo users (Only Owner)
-
-/{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports
-
-/{BotCommands.ConfigMenuCommand}: Get Info Menu about bot config (Owner Only).
-
-/{BotCommands.UpdateCommand}: Update Bot from Upstream Repo. (Owner Only).
-
-/{BotCommands.UsageCommand}: To see Heroku Dyno Stats (Owner & Sudo only).
-
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-
-/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file).
-
-/{BotCommands.ShellCommand}: Run commands in Shell (Terminal).
-
-/tshelp: Get help for Torrent search module.
-'''
-
-    help_string = f'''
-/{BotCommands.HelpCommand}: To get this message
-
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive.
-
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
-
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
-
-/{BotCommands.CloneCommand}: Copy file/folder to Google Drive
-
-/{BotCommands.CountCommand}: Count file/folder of Google Drive Links
-
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help.
-
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
-
-/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
-
-/{BotCommands.StatusCommand}: Shows a status of all the downloads
-
-/{BotCommands.ListCommand} [search term]: Searches the search term in the Google Drive, if found replies with the link
-
-/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
-
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-
-/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file).
-
-/tshelp: Get help for Torrent search module.
-'''
-
-    if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
-        sendMessage(help_string_adm, context.bot, update)
+    if (
+        user.id in OWNER_ID
+    ):
+        update.effective_message.reply_text(
+            text=STAFF_HELP_STRINGS,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Modules help", callback_data="help_back"
+                        )
+                    ]
+                ]
+            ),
+        )
     else:
-        sendMessage(help_string, context.bot, update)
+        update.effective_message.reply_text("You can't access this command")
+
+
+def get_help(update, context):
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user
+    args = update.effective_message.text.split(None, 1)
+
+    # ONLY send help in PM
+    if chat.type != chat.PRIVATE:
+
+        update.effective_message.reply_text(
+            "Contact me in PM to get the list of possible commands.",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Help",
+                            url="t.me/{}?start=help".format(
+                                context.bot.username
+                            ),
+                        )
+                    ]
+                ]
+            ),
+        )
+        return
+
+    elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
+        module = args[1].lower()
+        text = (
+            "Here is the available help for the *{}* module:\n".format(
+                HELPABLE[module].__mod_name__
+            )
+            + HELPABLE[module].__help__
+        )
+        send_help(
+            chat.id,
+            text,
+            InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Back", callback_data="help_back"
+                        )
+                    ]
+                ]
+            ),
+        )
+
+    else:
+        keyb = paginate_modules(0, HELPABLE, "help")
+        # Add aditional button if staff user detected
+        if (
+            user.id in OWNER_ID
+        ):
+            keyb += [
+                [
+                    InlineKeyboardButton(
+                        text="Staff", callback_data="help_staff"
+                    )
+                ]
+            ]
+
+        send_help(chat.id, HELP_STRINGS, InlineKeyboardMarkup(keyb))
+
 
 
 botcmds = [
@@ -218,8 +331,16 @@ def main():
                                   filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
     restart_handler = CommandHandler(BotCommands.RestartCommand, restart,
                                      filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
-    help_handler = CommandHandler(BotCommands.HelpCommand,
-                                  bot_help, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+    help_handler = CommandHandler(BotCommands.HelpCommand, get_help)
+    help_callback_handler = CallbackQueryHandler(
+        help_button, pattern=r"help_", run_async=True
+    )
+    help_staff_handler = CommandHandler(
+        "staffhelp",
+        staff_help,
+        filters=CustomFilters.support_filter,
+        run_async=True,
+    )
     stats_handler = CommandHandler(BotCommands.StatsCommand,
                                    stats, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
     log_handler = CommandHandler(BotCommands.LogCommand, log, filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
@@ -227,6 +348,8 @@ def main():
     dispatcher.add_handler(ping_handler)
     dispatcher.add_handler(restart_handler)
     dispatcher.add_handler(help_handler)
+    dispatcher.add_handler(help_callback_handler)
+    dispatcher.add_handler(help_staff_handler)
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
