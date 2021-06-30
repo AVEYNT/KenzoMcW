@@ -1,9 +1,14 @@
+import traceback
+import html
+import json
+import requests
 import shutil, psutil
 import signal
 import os
 import importlib
 import re
 
+from typing import Optional
 from pyrogram import idle
 from bot import app
 from sys import executable
@@ -34,19 +39,17 @@ the things I can help you with.
 *Main* commands available:
  × /start: Starts me, can be used to check i'm alive or no...
  × /help: PM's you this message.
- × /help <module name>: PM's you info about that module.
- × /settings: in PM: will send you your settings for all supported modules.
-   - in a group: will redirect you to pm, with all that chat's settings.
- \nClick on the buttons below to get documentation about specific modules!"""
+  \nClick on the buttons below to get documentation about specific modules!"""
 
 
 STAFF_HELP_STRINGS = """Hey there staff users. Nice to see you :)
 Here is all the staff's commands. Users above has the command access for all commands below.
 *OWNER*
-× /broadcast: Send a broadcast message to all chat that i'm currently in.
-× /staffids: Get all staff's you have.
-× /ip: Sends the bot's IP address to ssh in if necessary (PM only)."""
-
+× /restart
+× /update
+× /speed
+× /term
+"""
 
 IMPORTED = {}
 MIGRATEABLE = []
