@@ -45,6 +45,38 @@ Here is all the staff's commands. Users above has the command access for all com
 × /ip: Sends the bot's IP address to ssh in if necessary (PM only)."""
 
 
+IMPORTED = {}
+MIGRATEABLE = []
+HELPABLE = {}
+STATS = []
+USER_INFO = []
+DATA_IMPORT = []
+DATA_EXPORT = []
+
+CHAT_SETTINGS = {}
+USER_SETTINGS = {}
+
+GDPR = []
+
+for module_name in ALL_MODULES:
+    imported_module = importlib.import_module(
+        "ubotindo.modules." + module_name
+    )
+    if not hasattr(imported_module, "__mod_name__"):
+        imported_module.__mod_name__ = imported_module.__name__
+
+    if not imported_module.__mod_name__.lower() in IMPORTED:
+        IMPORTED[imported_module.__mod_name__.lower()] = imported_module
+    else:
+        raise Exception(
+            "Can't have two modules with the same name! Please change one"
+        )
+
+    if hasattr(imported_module, "__help__") and imported_module.__help__:
+        HELPABLE[imported_module.__mod_name__.lower()] = imported_module
+
+
+
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
     current = now.strftime('%Y/%m/%d %I:%M:%S %p')
