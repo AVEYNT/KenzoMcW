@@ -204,7 +204,7 @@ def help_button(update, context):
             keyb = paginate_modules(0, HELPABLE, "help")
             # Add aditional button if staff user detected
             if (
-                user.id in OWNER_ID
+                user.id == OWNER_ID
             ):
                 keyb += [
                     [
@@ -245,7 +245,7 @@ def staff_help(update, context):
         return
 
     if (
-        user.id in OWNER_ID
+        user.id == OWNER_ID
     ):
         update.effective_message.reply_text(
             text=STAFF_HELP_STRINGS,
@@ -315,7 +315,7 @@ def get_help(update, context):
         keyb = paginate_modules(0, HELPABLE, "help")
         # Add aditional button if staff user detected
         if (
-            user.id in OWNER_ID
+            user.id == OWNER_ID
         ):
             keyb += [
                 [
