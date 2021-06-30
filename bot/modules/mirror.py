@@ -344,7 +344,7 @@ def unzip_mirror(update, context):
     _mirror(context.bot, update, extract=True)
 
 
-_help__ = """
+__help__ = """
 ┎─────┨ 🔗Mirror ┠─────┒
 │
 │ ❖ /m : links or files to gdrive
