@@ -81,6 +81,15 @@ the things I can help you with.
 
 STAFF_HELP_STRINGS = """
 ┎─────┨ 👤 Owner ┠────┒
+│ ❖ /auth : izinkan  group
+│ ❖ /unauth : cabut izin group
+│ ❖ /users : izinkan orang
+│ ❖ /addsudo : add sudo
+│ ❖ /rmsudo : remove sudo
+│ ❖ /log : log file bot
+│ ❖ /config : info bot config
+│ ❖ /usage : heroku dyno stats
+│ ❖ /specs : stats server
 │ ❖ /del : delete files by links
 │ ❖ /update : update bot
 │ ❖ /term : terminal commands

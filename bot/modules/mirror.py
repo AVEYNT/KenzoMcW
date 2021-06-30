@@ -356,6 +356,7 @@ _help__ = """
 │ ❖ /tarm : pack to .tar files
 │ ❖ /tarw : pack to .tar videos
 │ ❖ /cancel : cancel download 
+│ ❖ /status : download status
 │ ❖ /speed : test internet speed
 ┖──────────────────┚
 """
