@@ -2,6 +2,7 @@ import shutil, psutil
 import signal
 import os
 import importlib
+import re
 
 from pyrogram import idle
 from bot import app
