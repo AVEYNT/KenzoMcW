@@ -1,6 +1,7 @@
 import shutil, psutil
 import signal
 import os
+import importlib
 
 from pyrogram import idle
 from bot import app
@@ -60,7 +61,7 @@ GDPR = []
 
 for module_name in ALL_MODULES:
     imported_module = importlib.import_module(
-        "ubotindo.modules." + module_name
+        "bot.modules." + module_name
     )
     if not hasattr(imported_module, "__mod_name__"):
         imported_module.__mod_name__ = imported_module.__name__
