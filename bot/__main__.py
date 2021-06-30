@@ -10,7 +10,8 @@ from datetime import datetime
 import pytz
 import time
 
-from telegram import ParseMode, BotCommand
+from telegram import Message, Chat, User
+from telegram import ParseMode, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, CallbackQueryHandler, Filters, MessageHandler
 from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS, OWNER_ID
 from bot.helper.ext_utils import fs_utils
