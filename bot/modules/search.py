@@ -326,5 +326,14 @@ def searchhelp(update, context):
     update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
     
     
+_help__ = """
+┎─────┨ ⚙ Tools ┠─────┒
+│ ❖ /speed : test internet server
+│ ❖ /tshelp : torrent search
+┖──────────────────┚
+"""    
+
+__mod_name__ = "⚙ Tools"
+    
 SEARCHHELP_HANDLER = CommandHandler("tshelp", searchhelp, filters=(CustomFilters.authorized_chat | CustomFilters.authorized_user) & CustomFilters.mirror_owner_filter, run_async=True)
 dispatcher.add_handler(SEARCHHELP_HANDLER)

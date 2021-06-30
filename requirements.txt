@@ -10,6 +10,7 @@ google-auth-oauthlib
 heroku3
 html-telegraph-poster
 js2py
+jikanpy
 lk21
 lxml
 messages

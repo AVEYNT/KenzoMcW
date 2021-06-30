@@ -31,6 +31,43 @@ from bot.helper.misc import paginate_modules
 
 now=datetime.now(pytz.timezone('Asia/Jakarta'))
 
+PM_START_TEXT = f"""
+Hey there! my name is *{dispatcher.bot.first_name}*.
+Any questions on how to use me? use /help
+Join Our [Group](https://t.me/KenzoMcW) If You wanna Report Issue 🙂
+I'm here to make your group management fun and easy!
+I have lots of handy features ☺️ such as :
+• 🔗 Mirror.         • 🇯🇵 Anime.
+• ⚙ Tools.   • Group Mng.
+*Managed With ❤️ By :* [Kenzo McW](https://t.me/KenzoMcWnews)
+Wanna Add me to your Group? Just click the button below!
+"""
+
+buttons = [
+    [
+        InlineKeyboardButton(
+            text="Add to Group 👥", url="t.me/userbotindobot?startgroup=true"
+        ),
+        InlineKeyboardButton(
+            text="Credits 💰", url="https://t.me/Nyolonglu"
+        ),
+    ]
+]
+
+
+buttons += [
+    [
+        InlineKeyboardButton(
+            text="Help & Commands ❔",
+            url=f"t.me/{dispatcher.bot.username}?start=help",
+        ),
+        InlineKeyboardButton(
+            text="Support Channel 🎗️", url="https://t.me/KenzoMcWnews"
+        ),
+    ]
+]
+
+
 
 HELP_STRINGS = f"""
 Hello there! My name is *{dispatcher.bot.first_name}*.
@@ -42,27 +79,19 @@ the things I can help you with.
   \nClick on the buttons below to get documentation about specific modules!"""
 
 
-STAFF_HELP_STRINGS = """Hey there staff users. Nice to see you :)
-Here is all the staff's commands. Users above has the command access for all commands below.
-*OWNER*
-× /restart
-× /update
-× /speed
-× /term
+STAFF_HELP_STRINGS = """
+┎─────┨ 👤 Owner ┠────┒
+│ ❖ /del : delete files by links
+│ ❖ /update : update bot
+│ ❖ /term : terminal commands
+│ ❖ /usage : check life of bot
+┖──────────────────┚
 """
 
 IMPORTED = {}
-MIGRATEABLE = []
 HELPABLE = {}
 STATS = []
-USER_INFO = []
-DATA_IMPORT = []
-DATA_EXPORT = []
 
-CHAT_SETTINGS = {}
-USER_SETTINGS = {}
-
-GDPR = []
 
 for module_name in ALL_MODULES:
     imported_module = importlib.import_module(
@@ -108,24 +137,71 @@ def stats(update, context):
     update.effective_message.reply_photo(IMAGE_URL, stats, parse_mode=ParseMode.HTML)
 
 
+# do not async
+def send_help(chat_id, text, keyboard=None):
+    if not keyboard:
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
+    dispatcher.bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=keyboard,
+    )
+
+
 def start(update, context):
-    start_string = f'''
-This bot can mirror all your links to Google Drive!
-Type /{BotCommands.HelpCommand} to get a list of available commands
-'''
-    buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Help", "t.me/kenzomcwbot?start=help")
-    buttons.buildbutton("My Master", "https://t.me/XEROZERO11")
-    reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
-    LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
-    uptime = get_readable_time((time.time() - botStartTime))
-    if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
-        if update.message.chat.type == "private" :
-            sendMessage(f"Hey I'm Alive 🙂\nSince: <code>{uptime}</code>", context.bot, update)
-        else :
-            update.effective_message.reply_photo(IMAGE_URL, start_string, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
-    else :
-        sendMessage(f"Oops! not a Authorized user.", context.bot, update)
+    if update.effective_chat.type == "private":
+        args = context.args
+        if len(args) >= 1:
+            if args[0].lower() == "help":
+                user = update.effective_user
+                keyb = paginate_modules(0, HELPABLE, "help")
+
+                if (
+                    user.id == OWNER_ID
+                ):
+                    keyb += [
+                        [
+                            InlineKeyboardButton(
+                                text="Staff", callback_data="help_staff"
+                            )
+                        ]
+                    ]
+
+                send_help(
+                    update.effective_chat.id,
+                    HELP_STRINGS,
+                    InlineKeyboardMarkup(keyb),
+                )
+
+            elif args[0].lower().startswith("stngs_"):
+                match = re.match("stngs_(.*)", args[0].lower())
+                chat = dispatcher.bot.getChat(match.group(1))
+
+                if is_user_admin(chat, update.effective_user.id):
+                    send_settings(
+                        match.group(1), update.effective_user.id, False
+                    )
+                else:
+                    send_settings(
+                        match.group(1), update.effective_user.id, True
+                    )
+
+            elif args[0][1:].isdigit() and "rules" in IMPORTED:
+                IMPORTED["rules"].send_rules(update, args[0], from_pm=True)
+
+        else:
+            update.effective_message.reply_photo(
+                IMAGE_URL,
+                PM_START_TEXT,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.MARKDOWN,
+                timeout=60,
+            )
+    else:
+        update.effective_message.reply_text(
+            "Sending you a warm hi & wishing your day is a happy one!"
+        )
 
 
 def restart(update, context):
@@ -147,18 +223,6 @@ def ping(update, context):
 
 def log(update, context):
     sendLogFile(context.bot, update)
-
-
-# do not async
-def send_help(chat_id, text, keyboard=None):
-    if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
-    dispatcher.bot.send_message(
-        chat_id=chat_id,
-        text=text,
-        parse_mode=ParseMode.MARKDOWN,
-        reply_markup=keyboard,
-    )
 
 
 def help_button(update, context):

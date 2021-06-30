@@ -344,6 +344,25 @@ def unzip_mirror(update, context):
     _mirror(context.bot, update, extract=True)
 
 
+_help__ = """
+┎─────┨ 🔗Mirror ┠─────┒
+│
+│ ❖ /m : links or files to gdrive
+│ ❖ /c : clone links gdrive
+│ ❖ /w : link videos to gdrive
+│ ❖ /unm : unpack files to gdrive
+│ ❖ /check : info gdrive files
+│ ❖ /cari : search files on gdrive
+│ ❖ /tarm : pack to .tar files
+│ ❖ /tarw : pack to .tar videos
+│ ❖ /cancel : cancel download 
+│ ❖ /speed : test internet speed
+┖──────────────────┚
+"""
+
+__mod_name__ = "🔗 Mirror"
+
+
 mirror_handler = CommandHandler(BotCommands.MirrorCommand, mirror,
                                 filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 tar_mirror_handler = CommandHandler(BotCommands.TarMirrorCommand, tar_mirror,
