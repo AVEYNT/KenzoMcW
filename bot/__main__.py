@@ -172,7 +172,7 @@ def start(update, context):
                     keyb += [
                         [
                             InlineKeyboardButton(
-                                text="Staff", callback_data="help_staff"
+                                text="👤Owner", callback_data="help_staff"
                             )
                         ]
                     ]
