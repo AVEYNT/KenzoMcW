@@ -532,19 +532,94 @@ def kayo(update: Update, context: CallbackContext):
 
 
 __help__ = """
+Available command sets :
+
 ┎─────┨ 🇯🇵 Anime ┠────┒
+
 │ ❖ /anime : search anime
+
 │ ❖ /manga : search manga
+
 │ ❖ /char : info about character
+
 │ ❖ /user : returns info about user
+
 │ ❖ /upcoming : info new anime
+
 │ ❖ /kaizoku : search anime
+
 │ ❖ /kayo : search anime
+
 │ ❖ /airing : returns anime airing
+
+┖──────────────────┚
+
+┎─────┨ 🔗Mirror ┠─────┒
+
+│
+
+│ ❖ /m : links or files to gdrive
+
+│ ❖ /c : clone links gdrive
+
+│ ❖ /w : link videos to gdrive
+
+│ ❖ /unm : unpack files to gdrive
+
+│ ❖ /count : info gdrive files
+
+│ ❖ /cari : search files on gdrive
+
+│ ❖ /tarm : pack to .tar files
+
+│ ❖ /tarw : pack to .tar videos
+
+│ ❖ /cancel : cancel download 
+
+│ ❖ /status : download status
+
+│ ❖ /speed : speed internet
+
+┖──────────────────┚
+
+┎─────┨ 😀 Stickers ┠───┒
+
+│ ❖ /stickerid : sticker file id
+
+│ ❖ /getsticker : sticker to png
+
+│ ❖ /kang : pack your sticker
+
+│ ❖ /stickers : find stickers
+
+┖──────────────────┚
+
+┎─────┨ Torrent 🔍 ┠───┒
+
+│ ❖ /nyaasi [write here]
+
+│ ❖ /sukebei [write here]
+
+│ ❖ /1337x [write here]
+
+│ ❖ /piratebay [write here]
+
+│ ❖ /tgx [write here]
+
+│ ❖ /yts [write here]
+
+│ ❖ /eztv [write here]
+
+│ ❖ /torlock [write here]
+
+│ ❖ /rarbg [write here]
+
+│ ❖ /ts [write here]
+
 ┖──────────────────┚
  """
 
-__mod_name__ = "🇯🇵 Anime"
+__mod_name__ = "🤖 Available Command"
 
 ANIME_HANDLER = CommandHandler("anime", anime, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 AIRING_HANDLER = CommandHandler("airing", airing, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
