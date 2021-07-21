@@ -33,4 +33,3 @@ class _BotCommands:
         self.TsHelpCommand = 'tshelp'
 
 BotCommands = _BotCommands()
-cd
