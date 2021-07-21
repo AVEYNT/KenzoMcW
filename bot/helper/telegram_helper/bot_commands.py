@@ -31,5 +31,6 @@ class _BotCommands:
         self.UpdateCommand = 'update'
         self.ExecHelpCommand = 'exechelp'
         self.TsHelpCommand = 'tshelp'
+        self.InfolainCommand = 'linksupport'
 
 BotCommands = _BotCommands()
