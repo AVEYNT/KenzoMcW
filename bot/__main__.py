@@ -1,3 +1,4 @@
+#userbotindo
 import traceback
 import html
 import json
@@ -19,7 +20,7 @@ import time
 from telegram import Message, Chat, User
 from telegram import ParseMode, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, CallbackQueryHandler, Filters, MessageHandler
-from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS, OWNER_ID
+from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS, OWNER_ID, TIMEZONE
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
@@ -28,8 +29,7 @@ from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from bot.modules import ALL_MODULES
 from bot.helper.misc import paginate_modules
-
-now=datetime.now(pytz.timezone('Asia/Jakarta'))
+now=datetime.now(pytz.timezone(f'{TIMEZONE}'))
 
 PM_START_TEXT = f"""
 Hey there! my name is *{dispatcher.bot.first_name}*.
@@ -88,12 +88,15 @@ STAFF_HELP_STRINGS = """
 │ ❖ /rmsudo : remove sudo
 │ ❖ /log : log file bot
 │ ❖ /config : info bot config
-│ ❖ /usage : heroku dyno stats
 │ ❖ /specs : stats server
 │ ❖ /del : delete files by links
 │ ❖ /update : update bot
 │ ❖ /term : terminal commands
-│ ❖ /usage : check life of bot
+│ ❖ /eval : run Python Code Lines
+│ ❖ /exec : run Commands In Exec
+│ ❖ /clearlocals : Cleared locals
+│ ❖ /life : check life of bot
+│ ❖ /exechelp : executor help
 ┖──────────────────┚
 """
 
@@ -118,7 +121,6 @@ for module_name in ALL_MODULES:
 
     if hasattr(imported_module, "__help__") and imported_module.__help__:
         HELPABLE[imported_module.__mod_name__.lower()] = imported_module
-
 
 
 def stats(update, context):
@@ -208,13 +210,10 @@ def start(update, context):
                 timeout=60,
             )
     else:
-        update.effective_message.reply_photo(
-            IMAGE_URL,
-            PM_START_TEXT,
-            reply_markup=InlineKeyboardMarkup(buttons),
-            parse_mode=ParseMode.MARKDOWN,
-            timeout=60,
+         update.effective_message.reply_text(
+            "Goblog, /help di pm anjing!!!"
         )
+
 
 
 def restart(update, context):
@@ -412,24 +411,26 @@ def get_help(update, context):
 
 
 botcmds = [
-BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
-BotCommand(f'{BotCommands.TarMirrorCommand}','Upload tar (zipped) file'),
-BotCommand(f'{BotCommands.UnzipMirrorCommand}','Extract files'),
-BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
-BotCommand(f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
-BotCommand(f'{BotCommands.WatchCommand}','Mirror YT-DL support link'),
-BotCommand(f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as tar'),
-BotCommand(f'{BotCommands.CancelMirror}','Cancel a task'),
-BotCommand(f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
-BotCommand(f'{BotCommands.DeleteCommand}','Delete file from Drive'),
-BotCommand(f'{BotCommands.ListCommand}',' [query] Searches files in Drive'),
-BotCommand(f'{BotCommands.StatusCommand}','Get Mirror Status message'),
-BotCommand(f'{BotCommands.StatsCommand}','Bot Usage Stats'),
-BotCommand(f'{BotCommands.HelpCommand}','Get Detailed Help'),
-BotCommand(f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
-BotCommand(f'{BotCommands.SpeedCommand}','Check Speed of the host'),
-BotCommand(f'{BotCommands.LogCommand}','Bot Log [owner/sudo only]'),
-BotCommand(f'{BotCommands.RestartCommand}','Restart bot [owner/sudo only]')]
+        (f'{BotCommands.HelpCommand}','Get Detailed Help'),
+        (f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
+        (f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
+        (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
+        (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+        (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
+        (f'{BotCommands.DeleteCommand}','Delete file from Drive'),
+        (f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
+        (f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as .tar'),
+        (f'{BotCommands.CancelMirror}','Cancel a task'),
+        (f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
+        (f'{BotCommands.ListCommand}','Searches files in Drive'),
+        (f'{BotCommands.StatusCommand}','Get Mirror Status message'),
+        (f'{BotCommands.StatsCommand}','Bot Usage Stats'),
+        (f'{BotCommands.PingCommand}','Ping the Bot'),
+        (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
+        (f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
+        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
+    ]
 
 
 def main():

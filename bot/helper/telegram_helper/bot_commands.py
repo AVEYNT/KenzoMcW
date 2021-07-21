@@ -20,14 +20,17 @@ class _BotCommands:
         self.LogCommand = 'log'
         self.SpeedCommand = 'speed'
         self.CloneCommand = 'c'
-        self.CountCommand = 'check'
+        self.CountCommand = 'count'
         self.WatchCommand = 'w'
         self.TarWatchCommand = 'tarw'
         self.DeleteCommand = 'del'
-        self.UsageCommand = 'usage'
-        self.MediaInfoCommand = 'medinfo'
+        self.UsageCommand = 'life'
+        self.MediaInfoCommand = 'vinfo'
         self.ConfigMenuCommand = 'config'
         self.ShellCommand = 'term'
         self.UpdateCommand = 'update'
+        self.ExecHelpCommand = 'exechelp'
+        self.TsHelpCommand = 'tshelp'
 
 BotCommands = _BotCommands()
+cd

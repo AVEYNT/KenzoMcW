@@ -2,8 +2,8 @@ import requests
 from telegram.ext import CommandHandler
 from telegram import InlineKeyboardMarkup
 
-from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK
-from bot import dispatcher, DOWNLOAD_DIR, DOWNLOAD_STATUS_UPDATE_INTERVAL, download_dict, download_dict_lock, SHORTENER, SHORTENER_API
+from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2
+from bot import dispatcher, DOWNLOAD_DIR, DOWNLOAD_STATUS_UPDATE_INTERVAL, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, TAR_UNZIP_LIMIT
 from bot.helper.ext_utils import fs_utils, bot_utils
 from bot.helper.ext_utils.bot_utils import setInterval, get_mega_link_type
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException, NotSupportedExtractionArchive
@@ -50,6 +50,7 @@ class MirrorListener(listeners.MirrorListeners):
 
     def clean(self):
         try:
+            aria2.purge()
             Interval[0].cancel()
             del Interval[0]
             delete_all_messages()
@@ -61,6 +62,7 @@ class MirrorListener(listeners.MirrorListeners):
             LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
             name = download.name()
+            gid = download.gid()
             size = download.size_raw()
             if name is None: # when pyrogram's media.file_name is of NoneType
                 name = os.listdir(f'{DOWNLOAD_DIR}{self.uid}')[0]
@@ -111,7 +113,7 @@ class MirrorListener(listeners.MirrorListeners):
         LOGGER.info(f"Upload Name : {up_name}")
         drive = gdriveTools.GoogleDriveHelper(up_name, self)
         size = fs_utils.get_path_size(up_path)
-        upload_status = UploadStatus(drive, size, self)
+        upload_status = UploadStatus(drive, size, gid, self)
         with download_dict_lock:
             download_dict[self.uid] = upload_status
         update_all_messages()
@@ -217,7 +219,13 @@ class MirrorListener(listeners.MirrorListeners):
                 pass
             del download_dict[self.message.message_id]
             count = len(download_dict)
-        sendMessage(e_str, self.bot, self.update)
+        if self.message.from_user.username:
+            uname = f"@{self.message.from_user.username}"
+        else:
+            uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
+        if uname is not None:
+            men = f'{uname} '
+        sendMessage(men + e_str, self.bot, self.update)
         if count == 0:
             self.clean()
         else:
@@ -271,8 +279,8 @@ def _mirror(bot, update, isTar=False, extract=False):
                 if file.mime_type != "application/x-bittorrent":
                     listener = MirrorListener(bot, update, pswd, isTar, tag, extract)
                     tg_downloader = TelegramDownloadHelper(listener)
-                    tg_downloader.add_download(reply_to, f'{DOWNLOAD_DIR}{listener.uid}/', name)
-                    sendStatusMessage(update, bot)
+                    ms = update.message
+                    tg_downloader.add_download(ms, f'{DOWNLOAD_DIR}{listener.uid}/', name)
                     if len(Interval) == 0:
                         Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
                     return
@@ -292,19 +300,33 @@ def _mirror(bot, update, isTar=False, extract=False):
             sendMessage(f"{e}", bot, update)
             return
         if "Youtube" in str(e):
-            sendMessage(f"ERROR: {e}", bot, update)
+            sendMessage(f"{e}", bot, update)
             return
 
     listener = MirrorListener(bot, update, pswd, isTar, tag, extract)
 
     if bot_utils.is_gdrive_link(link):
         if not isTar and not extract:
-            sendMessage(f"Use /{BotCommands.CloneCommand} To Copy Google Drive File/Folder", bot, update)
+            sendMessage(f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\nUse /{BotCommands.TarMirrorCommand} to make tar of Google Drive folder\nUse /{BotCommands.UnzipMirrorCommand} to extracts archive Google Drive file", bot, update)
             return
-        res, size, name = gdriveTools.GoogleDriveHelper().clonehelper(link)
+        res, size, name, files = gdriveTools.GoogleDriveHelper().clonehelper(link)
         if res != "":
             sendMessage(res, bot, update)
             return
+        if TAR_UNZIP_LIMIT is not None:
+            LOGGER.info(f'Checking File/Folder Size')
+            limit = TAR_UNZIP_LIMIT
+            limit = limit.split(' ', maxsplit=1)
+            limitint = int(limit[0])
+            msg = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}.\nYour File/Folder size is {get_readable_file_size(size)}.'
+            if 'G' in limit[1] or 'g' in limit[1]:
+                if size > limitint * 1024**3:
+                    sendMessage(msg, listener.bot, listener.update)
+                    return
+            elif 'T' in limit[1] or 't' in limit[1]:
+                if size > limitint * 1024**4:
+                    sendMessage(msg, listener.bot, listener.update)
+                    return
         LOGGER.info(f"Download Name : {name}")
         drive = gdriveTools.GoogleDriveHelper(name, listener)
         gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
@@ -342,26 +364,6 @@ def tar_mirror(update, context):
 
 def unzip_mirror(update, context):
     _mirror(context.bot, update, extract=True)
-
-
-__help__ = """
-┎─────┨ 🔗Mirror ┠─────┒
-│
-│ ❖ /m : links or files to gdrive
-│ ❖ /c : clone links gdrive
-│ ❖ /w : link videos to gdrive
-│ ❖ /unm : unpack files to gdrive
-│ ❖ /check : info gdrive files
-│ ❖ /cari : search files on gdrive
-│ ❖ /tarm : pack to .tar files
-│ ❖ /tarw : pack to .tar videos
-│ ❖ /cancel : cancel download 
-│ ❖ /status : download status
-│ ❖ /speed : test internet speed
-┖──────────────────┚
-"""
-
-__mod_name__ = "🔗 Mirror"
 
 
 mirror_handler = CommandHandler(BotCommands.MirrorCommand, mirror,
