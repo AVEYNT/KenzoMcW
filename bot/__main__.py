@@ -32,15 +32,16 @@ from bot.helper.misc import paginate_modules
 now=datetime.now(pytz.timezone(f'{TIMEZONE}'))
 
 PM_START_TEXT = f"""
-Hey there! my name is *{dispatcher.bot.first_name}*.
+Hello, I am *{dispatcher.bot.first_name}*.
 Any questions on how to use me? use /help
-Join Our [Group](https://t.me/KenzoMcW) If You wanna Report Issue 🙂
-I'm here to make your group management fun and easy!
-I have lots of handy features ☺️ such as :
-• 🔗 Mirror.         • 🇯🇵 Anime.
-• ⚙ Tools.   • Group Mng.
-*Managed With ❤️ By :* [Kenzo McW](https://t.me/KenzoMcWnews)
-Wanna Add me to your Group? Just click the button below!
+Join Our [Group](https://t.me/KenzoMcW) If You wanna Report Issue!
+I have lots of handy features ️ such as :
+❖ 🔗 Mirror      ❖ 🇯🇵 Anime
+❖ 🧲 Torrent    ❖ 📱Android
+❖ 🎞 VideoDL  ❖ 🗜 Unpack
+        ❖And many more❖
+Developer fork [Kenzo McW](https://t.me/KenzoMcWnews)
+Wanna Add me to your Group? Ask for access first!
 """
 
 buttons = [
@@ -49,7 +50,7 @@ buttons = [
             text="Add to Group 👥", url="t.me/userbotindobot?startgroup=true"
         ),
         InlineKeyboardButton(
-            text="Credits 💰", url="https://t.me/Nyolonglu"
+            text="Credits 💰", url="https://t.me/McWCreditsThx"
         ),
     ]
 ]
@@ -58,11 +59,11 @@ buttons = [
 buttons += [
     [
         InlineKeyboardButton(
-            text="Help & Commands ❔",
+            text="Command Set⚙️",
             url=f"t.me/{dispatcher.bot.username}?start=help",
         ),
         InlineKeyboardButton(
-            text="Support Channel 🎗️", url="https://t.me/KenzoMcWnews"
+            text="Support Channel 🧲", url="https://t.me/KenzoMcWnews"
         ),
     ]
 ]
@@ -70,12 +71,10 @@ buttons += [
 
 
 HELP_STRINGS = f"""
-Hello there! My name is *{dispatcher.bot.first_name}*.
-I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
-the things I can help you with.
+Hello, I am *{dispatcher.bot.first_name}*.
 *Main* commands available:
- × /start: Starts me, can be used to check i'm alive or no...
- × /help: PM's you this message.
+ ❖ /start: Starts me, can be used to check i'm alive or no...
+ ❖ /help: PM's you this message.
   \nClick on the buttons below to get documentation about specific modules!"""
 
 
@@ -211,7 +210,7 @@ def start(update, context):
             )
     else:
          update.effective_message.reply_text(
-            "Goblog, /help di pm anjing!!!"
+            "Edotensei success!!!✨, /help di pm anjing!!!🗿"
         )
 
 
@@ -354,7 +353,7 @@ def get_help(update, context):
     if chat.type != chat.PRIVATE:
 
         update.effective_message.reply_text(
-            "Contact me in PM to get the list of possible commands.",
+            "Use this command in private chat bitch, motherfucker.",
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
@@ -430,6 +429,7 @@ botcmds = [
         (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
         (f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
         (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
+        (f'{BotCommands.InfolainCommand}','Info link supported for mirroring')
     ]
 
 
