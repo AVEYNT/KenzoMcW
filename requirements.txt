@@ -14,7 +14,7 @@ js2py
 lk21
 lxml
 messages
-pillow
+Pillow
 psutil
 psycopg2-binary
 pybase64
