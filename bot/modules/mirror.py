@@ -364,6 +364,24 @@ def tar_mirror(update, context):
 
 def unzip_mirror(update, context):
     _mirror(context.bot, update, extract=True)
+    
+__help__ = """
+┎─────┨ 🔗Mirror ┠─────┒
+│ ❖ /m : links or files to gdrive
+│ ❖ /c : clone links gdrive
+│ ❖ /w : link videos to gdrive
+│ ❖ /unm : unpack files to gdrive
+│ ❖ /count : info gdrive files
+│ ❖ /cari : search files on gdrive
+│ ❖ /tarm : pack to .tar files
+│ ❖ /tarw : pack to .tar videos
+│ ❖ /cancel : cancel download 
+│ ❖ /status : download status
+│ ❖ /speed : speed internet
+┖──────────────────┚
+"""
+
+__mod_name__ = "🔗Mirror"
 
 
 mirror_handler = CommandHandler(BotCommands.MirrorCommand, mirror,

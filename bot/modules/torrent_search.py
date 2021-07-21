@@ -332,6 +332,22 @@ def searchhelp(update, context):
 '''
     update.effective_message.reply_photo(IMAGE_URL, help_string, parse_mode=ParseMode.HTML)
     
+__help__ = """
+┎─────┨ 🔍 Torrent ┠───┒
+│ ❖ /nyaasi [write here]
+│ ❖ /sukebei [write here]
+│ ❖ /1337x [write here]
+│ ❖ /piratebay [write here]
+│ ❖ /tgx [write here]
+│ ❖ /yts [write here]
+│ ❖ /eztv [write here]
+│ ❖ /torlock [write here]
+│ ❖ /rarbg [write here]
+│ ❖ /ts [write here]
+┖──────────────────┚
+"""
+
+__mod_name__ = "🔍 Torrent"
     
 SEARCHHELP_HANDLER = CommandHandler(BotCommands.TsHelpCommand, searchhelp, filters=(CustomFilters.authorized_chat | CustomFilters.authorized_user) & CustomFilters.mirror_owner_filter, run_async=True)
 dispatcher.add_handler(SEARCHHELP_HANDLER)
