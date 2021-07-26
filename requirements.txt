@@ -14,7 +14,6 @@ js2py
 lk21
 lxml
 messages
-Pillow
 psutil
 psycopg2-binary
 pybase64
@@ -29,3 +28,6 @@ telegraph
 tenacity
 TgCrypto
 youtube_dl
+pyDownload
+pillow
+asyncio
