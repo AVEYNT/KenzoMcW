@@ -35,26 +35,17 @@ load_dotenv('config.env')
 
 Interval = []
 
-<<<<<<< ours
 #version
 USERBOT_VERSION = "1.2 - Alpha"
 lang_code = os.environ.get('lang_code', "en")
 device_model = os.environ.get('device_model', platform.machine())
 system_version = os.environ.get('system_version', platform.platform())
 app_version = "⚙️KenzoMcW v{}".format(USERBOT_VERSION)
-=======
-USERBOT_VERSION = "1.2 - Alpha"
->>>>>>> theirs
 
-<<<<<<< ours
 # From config
     Command = os.environ.get("Command", "/")
     KENZO_WORKERS = int(os.environ.get('KENZO_WORKERS', 8))
 
-=======
-app_version = "⚙️KenzoMcW v{}".format(USERBOT_VERSION)
-
->>>>>>> theirs
 def getConfig(name: str):
     return os.environ[name]
 
