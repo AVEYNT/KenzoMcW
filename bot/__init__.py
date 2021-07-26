@@ -117,6 +117,7 @@ try:
     KENZO_WORKER = int(os.environ.get('KENZO_WORKER', 8))
     OWNER_ID = int(getConfig('OWNER_ID'))
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
+    UBOT_SESSION = getConfig('UBOT_SESSION')
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
     LOAD = os.environ.get("LOAD", "").split()
@@ -155,7 +156,7 @@ if DB_URI is not None:
         conn.close()
 
 LOGGER.info("Generating USER_SESSION_STRING")
-app = Client(':memory:', USER_SESSION_STRING, api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, workers=KENZO_WORKER)
+app = Client(':memory:', UBOT_SESSION, api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, workers=KENZO_WORKER)
 
 #Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
