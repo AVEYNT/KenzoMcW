@@ -167,17 +167,18 @@ app = Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_t
 app2 = Client(USER_SESSION_STRING, api_id=TELEGRAM_API, api_hash=TELEGRAM_HASH, app_version=app_version, device_model=device_model,
              system_version=system_version, lang_code=lang_code, workers=KENZO_WORKERS)
 
+#edrep
+async def edrep(msg: Message, **kwargs):
+    func = msg.edit_text if msg.from_user.is_self else msg.reply
+    spec = getfullargspec(func.__wrapped__).args
+    await func(**{k: v for k, v in kwargs.items()
+
 #Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
 LOGGER.info("Generating TELEGRAPH_TOKEN using '" + sname + "' name")
 telegraph = Telegraph()
 telegraph.create_account(short_name=sname)
 telegraph_token = telegraph.get_access_token()
-
-async def edrep(msg: Message, **kwargs):
-    func = msg.edit_text if msg.from_user.is_self else msg.reply
-    spec = getfullargspec(func.__wrapped__).args
-    await func(**{k: v for k, v in kwargs.items()
 
 try:
     STATUS_LIMIT = getConfig('STATUS_LIMIT')
