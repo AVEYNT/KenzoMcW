@@ -12,5 +12,7 @@ RUN pip install jikanpy
 RUN pip install hurry.filesize
 RUN pip install Pillow
 RUN pip install aria2p
+RUN pip install pyDownload
+RUN pip install asyncio
 
 CMD ["bash","start.sh"]
