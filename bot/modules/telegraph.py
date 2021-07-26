@@ -3,7 +3,8 @@ import os
 from pyrogram import filters
 from telegraph import upload_file
 
-from bot import Command, app2, OWNER_ID, edrep
+from bot import Command, app2, OWNER_ID
+from bot.edrep import edrep
 
 
 
