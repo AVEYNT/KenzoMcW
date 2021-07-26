@@ -10,5 +10,6 @@ RUN chmod +x aria.sh
 RUN pip install jikanpy
 RUN pip install hurry.filesize
 RUN pip install Pillow
+RUN pip install aria2p
 
 CMD ["bash","start.sh"]
