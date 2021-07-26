@@ -36,17 +36,6 @@ load_dotenv('config.env')
 
 Interval = []
 
-#version
-USERBOT_VERSION = "1.2 - Alpha"
-lang_code = os.environ.get('lang_code', "en")
-device_model = os.environ.get('device_model', platform.machine())
-system_version = os.environ.get('system_version', platform.platform())
-app_version = "⚙️KenzoMcW v{}".format(USERBOT_VERSION)
-
-# From config
-Command = os.environ.get("Command", "/")
-KENZO_WORKERS = int(os.environ.get('KENZO_WORKERS', 8))
-
 def getConfig(name: str):
     return os.environ[name]
 
@@ -79,6 +68,17 @@ aria2 = aria2p.API(
 
 DOWNLOAD_DIR = None
 BOT_TOKEN = None
+
+#version
+USERBOT_VERSION = "1.2 - Alpha"
+lang_code = os.environ.get('lang_code', "en")
+device_model = os.environ.get('device_model', platform.machine())
+system_version = os.environ.get('system_version', platform.platform())
+app_version = "⚙️KenzoMcW v{}".format(USERBOT_VERSION)
+
+# From config
+Command = os.environ.get("Command", "/")
+KENZO_WORKERS = int(os.environ.get('KENZO_WORKERS', 8))
 
 download_dict_lock = threading.Lock()
 status_reply_dict_lock = threading.Lock()
