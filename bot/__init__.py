@@ -113,8 +113,8 @@ try:
     if not DOWNLOAD_DIR.endswith("/"):
         DOWNLOAD_DIR = DOWNLOAD_DIR + '/'
     DOWNLOAD_STATUS_UPDATE_INTERVAL = int(getConfig('DOWNLOAD_STATUS_UPDATE_INTERVAL'))
-    KENZO_WORKER = Config.KENZO_WORKER
-    Command = Config.Command
+    Command = os.environ.get("Command", "/")
+    KENZO_WORKER = int(os.environ.get('KENZO_WORKER', 8))
     OWNER_ID = int(getConfig('OWNER_ID'))
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
