@@ -35,6 +35,9 @@ load_dotenv('config.env')
 
 Interval = []
 
+USERBOT_VERSION = "1.2 - Alpha"
+
+app_version = "⚙️KenzoMcW v{}".format(USERBOT_VERSION)
 
 def getConfig(name: str):
     return os.environ[name]
@@ -154,6 +157,9 @@ if DB_URI is not None:
 
 LOGGER.info("Generating USER_SESSION_STRING")
 app = Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN)
+
+app2 = Client(APP_SESSION, api_id=TELEGRAM_API, api_hash=TELEGRAM_HASH, app_version=app_version, device_model=device_model,
+             system_version=system_version, lang_code=lang_code, workers=KENZO_WORKERS, test_mode=TEST_MODE)
 
 #Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
