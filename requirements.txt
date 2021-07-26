@@ -31,3 +31,4 @@ youtube_dl
 pyDownload
 pillow
 asyncio
+hurry.filesize
