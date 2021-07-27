@@ -157,16 +157,6 @@
         "value": "False",
         "required": false
        },
-      "KENZO_WORKER": {
-        "description": "worker 8.",
-        "value": "8",
-        "required": false
-       },
-      "Command": {
-        "description": "command for execute.",
-        "value": "/",
-        "required": false
-       },
       "BUTTON_FOUR_NAME": {
         "description": "Extra buttons (optional).",
         "required": false
