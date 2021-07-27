@@ -20,10 +20,6 @@
         "description": "The telegram bot token that you get from @BotFather.",
         "required": true
       },
-      "UBOT_SESSION": {
-        "description": "worker 8.",
-        "required": false
-       },
       "GDRIVE_FOLDER_ID": {
         "description": "This is the folder ID of the Google Drive Folder to which you want to upload all the mirrors.",
         "required": true
