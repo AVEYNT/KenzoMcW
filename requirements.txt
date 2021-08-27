@@ -9,11 +9,14 @@ google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 heroku3
+hurry.filesize
 html-telegraph-poster
 js2py
+jikanpy
 lk21
 lxml
 messages
+pillow
 psutil
 psycopg2-binary
 pybase64
@@ -28,6 +31,3 @@ telegraph
 tenacity
 TgCrypto
 youtube_dl
-pyDownload
-pillow
-asyncio

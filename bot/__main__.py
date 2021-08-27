@@ -428,7 +428,7 @@ botcmds = [
         (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
         (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
         (f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
-        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module'),
+        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
         (f'{BotCommands.InfolainCommand}','Info link supported for mirroring')
     ]
 

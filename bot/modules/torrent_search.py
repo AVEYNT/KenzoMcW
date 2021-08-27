@@ -51,7 +51,7 @@ async def return_search(query, page=1, sukebei=False):
                     link = f'<code>{link}</code>'
                 newtext = f'''<b>{a + 1}.</b> <code>{html.escape(i["title"])}</code>
 <b>Link:</b> <code>{link}</code>
-<b>Size:</b> <code>{i["nyaa_size"]}</code>
+<b>Ukuran:</b> <code>{i["nyaa_size"]}</code>
 <b>Seeders:</b> <code>{i["nyaa_seeders"]}</code>
 <b>Leechers:</b> <code>{i["nyaa_leechers"]}</code>
 <b>Category:</b> <code>{i["nyaa_category"]}</code>\n\n'''
