@@ -8,8 +8,7 @@
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/XZE-WOLF/KenzoMcW)
 ![GitHub contributors](https://img.shields.io/github/contributors/XZE-WOLF/KenzoMcW?style=flat)
 ![GitHub repo size](https://img.shields.io/github/repo-size/XZE-WOLF/KenzoMcW?color=red)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/XZE-WOLF/KenzoMcW)
-[![Slam Mirror Support](https://img.shields.io/badge/kenzo%20mcw%20bot-link%20group-blue)](https://t.me/kenzomcwbot)
+[![Kenzo Support](https://img.shields.io/badge/kenzo%20mcw%20bot-link%20channel-blue)](https://t.me/kenzomcwbot)
 
 **KenzoMcW** is a _multipurpose_ Telegram Bot writen in Python for mirroring files on the Internet to our beloved Google Drive.
 
