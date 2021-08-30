@@ -28,5 +28,6 @@ class _BotCommands:
         self.ShellCommand = 'shell'
         self.ExecHelpCommand = 'exechelp'
         self.InfolainCommand = 'exinfo'
+        self.TsHelpCommand = 'tshelp'
 
 BotCommands = _BotCommands()
