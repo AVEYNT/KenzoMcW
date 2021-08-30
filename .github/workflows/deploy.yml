@@ -16,30 +16,4 @@ jobs:
           docker_heroku_process_type: worker
           stack: "container"
           region: "us"
-        env:
-          HD_BOT_TOKEN: ${{secrets.BOT_TOKEN}}
-          HD_GDRIVE_FOLDER_ID: ${{secrets.GDRIVE_FOLDER_ID}}
-          HD_OWNER_ID: ${{secrets.OWNER_ID}}
-          HD_DOWNLOAD_DIR: ${{secrets.DOWNLOAD_DIR}}
-          HD_DOWNLOAD_STATUS_UPDATE_INTERVAL: ${{secrets.DOWNLOAD_STATUS_UPDATE_INTERVAL}}
-          HD_AUTO_DELETE_MESSAGE_DURATION: ${{secrets.AUTO_DELETE_MESSAGE_DURATION}}
-          HD_IS_TEAM_DRIVE: ${{secrets.IS_TEAM_DRIVE}}
-          HD_TELEGRAM_API: ${{secrets.TELEGRAM_API}}
-          HD_TELEGRAM_HASH: ${{secrets.TELEGRAM_HASH}}
-          HD_AUTHORIZED_CHATS: ${{secrets.AUTHORIZED_CHATS}}
-          HD_IGNORE_PENDING_REQUESTS: ${{secrets.IGNORE_PENDING_REQUESTS}}
-          HD_INDEX_URL: ${{secrets.INDEX_URL}}
-          HD_MEGA_API_KEY: ${{secrets.MEGA_API_KEY}}
-          HD_MEGA_EMAIL_ID: ${{secrets.MEGA_EMAIL_ID}}
-          HD_MEGA_PASSWORD: ${{secrets.MEGA_PASSWORD}}
-          HD_STOP_DUPLICATE: ${{secrets.STOP_DUPLICATE}}
-          HD_TOKEN_PICKLE_URL : ${{secrets.TOKEN_PICKLE_URL }}
-          HD_TORRENT_DIRECT_LIMIT: ${{secrets.TORRENT_DIRECT_LIMIT}}
-          HD_TAR_UNZIP_LIMIT: ${{secrets.TAR_UNZIP_LIMIT}}
-          HD_CLONE_LIMIT: ${{secrets.CLONE_LIMIT}}
-          HD_MEGA_LIMIT: ${{secrets.MEGA_LIMIT}}
-          HD_STATUS_LIMIT: ${{secrets.STATUS_LIMIT}}
-          HD_HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
-          HD_HEROKU_APP_NAME: ${{secrets.HEROKU_APP_NAME}}
-          HD_VIEW_LINK: ${{secrets.VIEW_LINK}}
-          HD_IMAGE_URL: ${{secrets.IMAGE_URL}}
+          env_file: "config.env"
