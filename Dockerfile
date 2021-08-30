@@ -1,4 +1,4 @@
-FROM vincreator/eunhamirror:latest
+FROM aveynata13/kangnipispython:latest
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app
