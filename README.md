@@ -264,6 +264,8 @@ sudo docker image prune -a
 </details>
 
 # Using Service Accounts for uploading to avoid user rate limit
+<details>
+    <summary><b>Click Here For More Details</b></summary>
 For Service Account to work, you must set `USE_SERVICE_ACCOUNTS`="True" in config file or environment variables, 
 Many thanks to [AutoRClone](https://github.com/xyou365/AutoRclone) for the scripts.
 **NOTE**: Using Service Accounts is only recommended while uploading to a Team Drive.
@@ -327,8 +329,11 @@ python3 gen_sa_accounts.py --download-keys project_id
 ```
 python3 add_to_team_drive.py -d SharedTeamDriveSrcID
 ```
-
+</details>
+ 
 # Youtube-dl authentication using [.netrc](https://github.com/SlamDevs/slam-mirrorbot/blob/master/.netrc) file
+<details>
+    <summary><b>Click Here For More Details</b></summary>
 For using your premium accounts in Youtube-dl or for protected Index Links, edit the netrc file according to following format:
 ```
 machine host login username password my_youtube_password
@@ -339,7 +344,9 @@ machine example.workers.dev password index_password
 ```
 Where host is the name of extractor (eg. Youtube, Twitch). Multiple accounts of different hosts can be added each separated by a new line.
 
-# Credits
+</details>
+
+ # Credits
 
 Thanks to:
 - [`out386`](https://github.com/out386) heavily inspired from Telegram Bot which is written in JS
