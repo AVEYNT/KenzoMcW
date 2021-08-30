@@ -1,5 +1,3 @@
-
-#fixed
 import sys
 
 from bot import LOAD, LOGGER, NO_LOAD

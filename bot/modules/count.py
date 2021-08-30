@@ -1,5 +1,6 @@
-# Implement By https://github.com/anasty17
-# © https://github.com/breakdowns/slam-mirrorbot
+# Implement By - @anasty17 (https://github.com/SlamDevs/slam-mirrorbot/pull/111)
+# (c) https://github.com/SlamDevs/slam-mirrorbot
+# All rights reserved
 
 from telegram.ext import CommandHandler
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
@@ -22,7 +23,7 @@ def countNode(update, context):
         else:
             uname = f'<a href="tg://user?id={update.message.from_user.id}">{update.message.from_user.first_name}</a>'
         if uname is not None:
-            cc = f'\n\nPencermin: {uname}'
+            cc = f'\n\ncc: {uname}'
         sendMessage(result + cc, context.bot, update)
     else:
         sendMessage("Provide G-Drive Shareable Link to Count.", context.bot, update)

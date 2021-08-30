@@ -22,7 +22,6 @@ def speedtest(update, context):
 <b>Country:</b> <code>{result['server']['country']}, {result['server']['cc']}</code>
 <b>Sponsor:</b> <code>{result['server']['sponsor']}</code>
 <b>ISP:</b> <code>{result['client']['isp']}</code>
-
 <b>SpeedTest Results</b>
 <b>Upload:</b> <code>{speed_convert(result['upload'] / 8)}</code>
 <b>Download:</b>  <code>{speed_convert(result['download'] / 8)}</code>

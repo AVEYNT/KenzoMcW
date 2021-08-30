@@ -416,13 +416,11 @@ def user(update: Update, context: CallbackContext):
     caption += textwrap.dedent(
         f"""
     *Username*: [{us['username']}]({us['url']})
-
     *Gender*: `{us['gender']}`
     *Birthday*: `{user_birthday_formatted}`
     *Joined*: `{user_joined_date_formatted}`
     *Days wasted watching anime*: `{us['anime_stats']['days_watched']}`
     *Days wasted reading manga*: `{us['manga_stats']['days_read']}`
-
     """,
     )
 

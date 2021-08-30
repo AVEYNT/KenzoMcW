@@ -1,26 +1,18 @@
-#userbotindo
-import traceback
-import html
-import json
-import requests
 import shutil, psutil
 import signal
 import os
+import asyncio
 import importlib
 import re
 
-from typing import Optional
 from pyrogram import idle
-from bot import app
+from bot import app, alive
 from sys import executable
-from datetime import datetime
-import pytz
-import time
 
-from telegram import Message, Chat, User
-from telegram import ParseMode, BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CommandHandler, CallbackQueryHandler, Filters, MessageHandler
-from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, IGNORE_PENDING_REQUESTS, OWNER_ID, TIMEZONE
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CommandHandler, CallbackQueryHandler
+from wserver import start_server_async
+from bot import bot, dispatcher, updater, botStartTime, OWNER_ID, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT, IMAGE_URL
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
@@ -29,7 +21,6 @@ from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from bot.modules import ALL_MODULES
 from bot.helper.misc import paginate_modules
-now=datetime.now(pytz.timezone(f'{TIMEZONE}'))
 
 PM_START_TEXT = f"""
 Hello, I am *{dispatcher.bot.first_name}*.
@@ -50,7 +41,7 @@ buttons = [
             text="Add to Group 👥", url="t.me/userbotindobot?startgroup=true"
         ),
         InlineKeyboardButton(
-            text="Credits 💰", url="https://t.me/McWCreditsThx"
+            text="Credits 💰", url="https://github.com/SlamDevs/slam-mirrorbot/graphs/contributors"
         ),
     ]
 ]
@@ -101,7 +92,6 @@ STAFF_HELP_STRINGS = """
 
 IMPORTED = {}
 HELPABLE = {}
-STATS = []
 
 
 for module_name in ALL_MODULES:
@@ -124,7 +114,6 @@ for module_name in ALL_MODULES:
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
-    current = now.strftime('%Y/%m/%d %I:%M:%S %p')
     total, used, free = shutil.disk_usage('.')
     total = get_readable_file_size(total)
     used = get_readable_file_size(used)
@@ -135,11 +124,10 @@ def stats(update, context):
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
     stats = f'<b>Bot Uptime:</b> {currentTime}\n' \
-            f'<b>Start Time:</b> {current}\n' \
             f'<b>Total Disk Space:</b> {total}\n' \
             f'<b>Used:</b> {used}  ' \
             f'<b>Free:</b> {free}\n\n' \
-            f'📊Data Usage📊\n<b>Upload:</b> {sent}\n' \
+            f'📊Data Usage\n<b>Upload:</b> {sent}\n' \
             f'<b>Download:</b> {recv}\n\n' \
             f'<b>CPU:</b> {cpuUsage}%\n' \
             f'<b>RAM:</b> {memory}%\n' \
@@ -213,8 +201,6 @@ def start(update, context):
             "Edotensei success!!!✨, /help di pm anjing!!!🗿"
         )
 
-
-
 def restart(update, context):
     restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
     # Save restart message object in order to reply to it after restarting
@@ -222,6 +208,7 @@ def restart(update, context):
         f.truncate(0)
         f.write(f"{restart_message.chat.id}\n{restart_message.message_id}\n")
     fs_utils.clean_all()
+    alive.terminate()
     os.execl(executable, executable, "-m", "bot")
 
 
@@ -407,12 +394,11 @@ def get_help(update, context):
 
         send_help(chat.id, HELP_STRINGS, InlineKeyboardMarkup(keyb))
 
-
-
 botcmds = [
         (f'{BotCommands.HelpCommand}','Get Detailed Help'),
         (f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
         (f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
+        (f'{BotCommands.ZipMirrorCommand}','Start mirroring and upload as .zip'),
         (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
         (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
         (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
@@ -426,15 +412,16 @@ botcmds = [
         (f'{BotCommands.StatsCommand}','Bot Usage Stats'),
         (f'{BotCommands.PingCommand}','Ping the Bot'),
         (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
-        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
-        (f'{BotCommands.MediaInfoCommand}','Get detailed info about replied media'),
-        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module'),
-        (f'{BotCommands.InfolainCommand}','Info link supported for mirroring')
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]')
     ]
 
 
 def main():
     fs_utils.start_cleanup()
+
+    if IS_VPS:
+        asyncio.get_event_loop().run_until_complete(start_server_async(SERVER_PORT))
+
     # Check if the bot is restarting
     if os.path.isfile(".restartmsg"):
         with open(".restartmsg") as f:

@@ -4,8 +4,10 @@ import threading
 import time
 import random
 import string
+import subprocess
 
 import aria2p
+import qbittorrentapi as qba
 import telegram.ext as tg
 from dotenv import load_dotenv
 from pyrogram import Client
@@ -31,7 +33,19 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 LOGGER = logging.getLogger(__name__)
 
+CONFIG_FILE_URL = os.environ.get('CONFIG_FILE_URL', None)
+if CONFIG_FILE_URL is not None:
+    out = subprocess.run(["wget", "-q", "-O", "config.env", CONFIG_FILE_URL])
+    if out.returncode != 0:
+        logging.error(out)
+
 load_dotenv('config.env')
+
+alive = subprocess.Popen(["python3", "alive.py"])
+
+subprocess.run(["mkdir", "-p", "qBittorrent/config"])
+subprocess.run(["cp", "qBittorrent.conf", "qBittorrent/config/qBittorrent.conf"])
+subprocess.run(["qbittorrent-nox", "-d", "--profile=."])
 
 Interval = []
 
@@ -66,6 +80,18 @@ aria2 = aria2p.API(
     )
 )
 
+
+def get_client() -> qba.TorrentsAPIMixIn:
+    qb_client = qba.Client(host="localhost", port=8090, username="admin", password="adminadmin")
+    try:
+        qb_client.auth_log_in()
+        #qb_client.application.set_preferences({"disk_cache":64, "incomplete_files_ext":True, "max_connec":3000, "max_connec_per_torrent":300, "async_io_threads":8, "preallocate_all":True, "upnp":True, "dl_limit":-1, "up_limit":-1, "dht":True, "pex":True, "lsd":True, "encryption":0, "queueing_enabled":True, "max_active_downloads":15, "max_active_torrents":50, "dont_count_slow_torrents":True, "bittorrent_protocol":0, "recheck_completed_torrents":True, "enable_multi_connections_from_same_ip":True, "slow_torrent_dl_rate_threshold":100,"slow_torrent_inactive_timer":600})
+        return qb_client
+    except qba.LoginFailed as e:
+        LOGGER.error(str(e))
+        return None
+
+
 DOWNLOAD_DIR = None
 BOT_TOKEN = None
 
@@ -89,7 +115,6 @@ if os.path.exists('sudo_users.txt'):
     with open('sudo_users.txt', 'r+') as f:
         lines = f.readlines()
         for line in lines:
-            AUTHORIZED_CHATS.add(int(line.split()[0]))
             SUDO_USERS.add(int(line.split()[0]))
 try:
     achats = getConfig('AUTHORIZED_CHATS')
@@ -102,7 +127,6 @@ try:
     schats = getConfig('SUDO_USERS')
     schats = schats.split(" ")
     for chats in schats:
-        AUTHORIZED_CHATS.add(int(chats))
         SUDO_USERS.add(int(chats))
 except:
     pass
@@ -114,13 +138,12 @@ try:
         DOWNLOAD_DIR = DOWNLOAD_DIR + '/'
     DOWNLOAD_STATUS_UPDATE_INTERVAL = int(getConfig('DOWNLOAD_STATUS_UPDATE_INTERVAL'))
     OWNER_ID = int(getConfig('OWNER_ID'))
+    IMAGE_URL = getConfig('IMAGE_URL')
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
     LOAD = os.environ.get("LOAD", "").split()
     NO_LOAD = os.environ.get("NO_LOAD", "").split()
-    UPSTREAM_REPO = getConfig('UPSTREAM_REPO')
-    UPSTREAM_BRANCH = getConfig('UPSTREAM_BRANCH')
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
@@ -155,7 +178,7 @@ if DB_URI is not None:
 LOGGER.info("Generating USER_SESSION_STRING")
 app = Client(':memory:', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN)
 
-#Generate Telegraph Token
+# Generate Telegraph Token
 sname = ''.join(random.SystemRandom().choices(string.ascii_letters, k=8))
 LOGGER.info("Generating TELEGRAPH_TOKEN using '" + sname + "' name")
 telegraph = Telegraph()
@@ -186,18 +209,17 @@ except KeyError:
     MEGA_PASSWORD = None
 try:
     HEROKU_API_KEY = getConfig('HEROKU_API_KEY')
-except KeyError:
-    logging.warning('HEROKU API KEY not provided!')
-    HEROKU_API_KEY = None
-try:
     HEROKU_APP_NAME = getConfig('HEROKU_APP_NAME')
+    if len(HEROKU_API_KEY) == 0 or len(HEROKU_APP_NAME) == 0:
+        HEROKU_API_KEY = None
+        HEROKU_APP_NAME = None
 except KeyError:
-    logging.warning('HEROKU APP NAME not provided!')
+    HEROKU_API_KEY = None
     HEROKU_APP_NAME = None
 try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
 except KeyError:
-    logging.info('UPTOBOX_TOKEN not provided!')
+    logging.warning('UPTOBOX_TOKEN not provided!')
     UPTOBOX_TOKEN = None
 try:
     INDEX_URL = getConfig('INDEX_URL')
@@ -254,21 +276,13 @@ except KeyError:
     BUTTON_SIX_NAME = None
     BUTTON_SIX_URL = None
 try:
-    STOP_DUPLICATE_MIRROR = getConfig('STOP_DUPLICATE_MIRROR')
-    if STOP_DUPLICATE_MIRROR.lower() == 'true':
-        STOP_DUPLICATE_MIRROR = True
+    STOP_DUPLICATE = getConfig('STOP_DUPLICATE')
+    if STOP_DUPLICATE.lower() == 'true':
+        STOP_DUPLICATE = True
     else:
-        STOP_DUPLICATE_MIRROR = False
+        STOP_DUPLICATE = False
 except KeyError:
-    STOP_DUPLICATE_MIRROR = False
-try:
-    STOP_DUPLICATE_MEGA = getConfig('STOP_DUPLICATE_MEGA')
-    if STOP_DUPLICATE_MEGA.lower() == 'true':
-        STOP_DUPLICATE_MEGA = True
-    else:
-        STOP_DUPLICATE_MEGA = False
-except KeyError:
-    STOP_DUPLICATE_MEGA = False
+    STOP_DUPLICATE = False
 try:
     VIEW_LINK = getConfig('VIEW_LINK')
     if VIEW_LINK.lower() == 'true':
@@ -277,14 +291,6 @@ try:
         VIEW_LINK = False
 except KeyError:
     VIEW_LINK = False
-try:
-    STOP_DUPLICATE_CLONE = getConfig('STOP_DUPLICATE_CLONE')
-    if STOP_DUPLICATE_CLONE.lower() == 'true':
-        STOP_DUPLICATE_CLONE = True
-    else:
-        STOP_DUPLICATE_CLONE = False
-except KeyError:
-    STOP_DUPLICATE_CLONE = False
 try:
     IS_TEAM_DRIVE = getConfig('IS_TEAM_DRIVE')
     if IS_TEAM_DRIVE.lower() == 'true':
@@ -326,36 +332,58 @@ except KeyError:
     SHORTENER = None
     SHORTENER_API = None
 try:
-    IMAGE_URL = getConfig('IMAGE_URL')
-    if len(IMAGE_URL) == 0:
-        IMAGE_URL = 'https://telegra.ph/file/db03910496f06094f1f7a.jpg'
-except KeyError:
-    IMAGE_URL = 'https://telegra.ph/file/db03910496f06094f1f7a.jpg'
-
-IGNORE_PENDING_REQUESTS = False
-try:
-    if getConfig("IGNORE_PENDING_REQUESTS").lower() == "true":
+    IGNORE_PENDING_REQUESTS = getConfig("IGNORE_PENDING_REQUESTS")
+    if IGNORE_PENDING_REQUESTS.lower() == 'true':
         IGNORE_PENDING_REQUESTS = True
+    else:
+        IGNORE_PENDING_REQUESTS = False
 except KeyError:
-    pass
+    IGNORE_PENDING_REQUESTS = False
 try:
-    FINISHED_PROGRESS_STR = getConfig('FINISHED_PROGRESS_STR')
-    if len(FINISHED_PROGRESS_STR) == 0:
-        FINISHED_PROGRESS_STR = '●'
+    BASE_URL = getConfig('BASE_URL_OF_BOT')
+    if len(BASE_URL) == 0:
+        BASE_URL = None
 except KeyError:
-    FINISHED_PROGRESS_STR = '●'
+    logging.warning('BASE_URL_OF_BOT not provided!')
+    BASE_URL = None
 try:
-    UNFINISHED_PROGRESS_STR = getConfig('UNFINISHED_PROGRESS_STR')
-    if len(UNFINISHED_PROGRESS_STR) == 0:
-        UNFINISHED_PROGRESS_STR = '○'
+    IS_VPS = getConfig('IS_VPS')
+    if IS_VPS.lower() == 'true':
+        IS_VPS = True
+    else:
+        IS_VPS = False
 except KeyError:
-    UNFINISHED_PROGRESS_STR = '○'
+    IS_VPS = False
 try:
-    TIMEZONE = getConfig('TIMEZONE')
-    if len(TIMEZONE) == 0:
-        TIMEZONE = 'Asia/Jakarta'
+    SERVER_PORT = getConfig('SERVER_PORT')
+    if len(SERVER_PORT) == 0:
+        SERVER_PORT = None
 except KeyError:
-    TIMEZONE = 'Asia/Jakarta'
+    logging.warning('SERVER_PORT not provided!')
+    SERVER_PORT = None
+try:
+    TOKEN_PICKLE_URL = getConfig('TOKEN_PICKLE_URL')
+    if len(TOKEN_PICKLE_URL) == 0:
+        TOKEN_PICKLE_URL = None
+    else:
+        out = subprocess.run(["wget", "-q", "-O", "token.pickle", TOKEN_PICKLE_URL])
+        if out.returncode != 0:
+            logging.error(out)
+except KeyError:
+    TOKEN_PICKLE_URL = None
+try:
+    ACCOUNTS_ZIP_URL = getConfig('ACCOUNTS_ZIP_URL')
+    if len(ACCOUNTS_ZIP_URL) == 0:
+        ACCOUNTS_ZIP_URL = None
+    else:
+        out = subprocess.run(["wget", "-q", "-O", "accounts.zip", ACCOUNTS_ZIP_URL])
+        if out.returncode != 0:
+            logging.error(out)
+            raise KeyError
+        subprocess.run(["unzip", "-q", "-o", "accounts.zip"])
+        os.remove("accounts.zip")
+except KeyError:
+    ACCOUNTS_ZIP_URL = None
 
 updater = tg.Updater(token=BOT_TOKEN)
 bot = updater.bot
