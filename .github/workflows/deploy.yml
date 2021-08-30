@@ -16,4 +16,4 @@ jobs:
           docker_heroku_process_type: worker
           stack: "container"
           region: "us"
-          env_file: "config.env"
+          env_file: ".config.env"
