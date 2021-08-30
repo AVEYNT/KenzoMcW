@@ -4,6 +4,7 @@ import threading
 import time
 import random
 import string
+import subprocess
 
 import aria2p
 import telegram.ext as tg
@@ -30,6 +31,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 LOGGER = logging.getLogger(__name__)
+
+CONFIG_FILE_URL = os.environ.get('CONFIG_FILE_URL', None)
+if CONFIG_FILE_URL is not None:
+    out = subprocess.run(["wget", "-q", "-O", "config.env", CONFIG_FILE_URL])
+    if out.returncode != 0:
+        logging.error(out)
 
 load_dotenv('config.env')
 
