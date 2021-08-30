@@ -14,7 +14,6 @@ google-auth-oauthlib
 gunicorn
 heroku3
 hurry.filesize
-itertools
 js2py
 lk21
 jikanpy
