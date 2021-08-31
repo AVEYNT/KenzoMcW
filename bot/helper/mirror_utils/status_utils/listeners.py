@@ -5,7 +5,7 @@ class MirrorListeners:
         self.message = update.message
         self.uid = self.message.message_id
 
-    def onDownloadStarted(self):
+    def onDownloadStarted(self, link: str):
         raise NotImplementedError
 
     def onDownloadProgress(self):
