@@ -346,13 +346,13 @@ def bootleg(update, context) -> str:
 
 
 __help__ = """
-┎─────┨ 📱 Android ┠─────┒
-│ ❖ /magisk : magisk latest version
-│ ❖ /device : info ur device by codename
-│ ❖ /twrp : get lastest  twrp 
-│ ❖ /los : lineage latest
-│ ❖ /gsi : gsi rom 
-┖──────────────────┚
+┎─────「 📱 Android 」
+├  ❖ /magisk : Magisk versi terbaru
+├  ❖ /device  : Kode nama perangkat
+├  ❖ /twrp : Dapatkan twrp terbaru
+├  ❖ /los : LineageOS terbaru
+├  ❖ /gsi : GSI rom 
+╰───────「🔹AVEYUBOT」
 """    
 
 __mod_name__ = "📱 Android"

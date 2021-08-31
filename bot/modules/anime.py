@@ -10,21 +10,21 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Upda
 from telegram.ext import CallbackContext, CommandHandler
 from bot.helper.telegram_helper.filters import CustomFilters
 
-info_btn = "More Information"
+info_btn = "Informasi lebih lanjut"
 kaizoku_btn = "Kaizoku ☠️"
 kayo_btn = "Kayo 🏴‍☠️"
-prequel_btn = "⬅️ Prequel"
-sequel_btn = "Sequel ➡️"
-close_btn = "Close ❌"
+prequel_btn = "⬅️ Prekuel"
+sequel_btn = "Sekuel ➡️"
+close_btn = "Tutup ❌"
 
 
 def shorten(description, info="anilist.co"):
     msg = ""
     if len(description) > 700:
         description = description[0:500] + "...."
-        msg += f"\n*Description*: _{description}_[Read More]({info})"
+        msg += f"\n*Deskripsi*: _{description}_[Baca selengkapnya]({info})"
     else:
-        msg += f"\n*Description*:_{description}_"
+        msg += f"\n*Deskripsi*:_{description}_"
     return msg
 
 
@@ -37,10 +37,10 @@ def t(milliseconds: int) -> str:
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     tmp = (
-        ((str(days) + " Days, ") if days else "")
-        + ((str(hours) + " Hours, ") if hours else "")
-        + ((str(minutes) + " Minutes, ") if minutes else "")
-        + ((str(seconds) + " Seconds, ") if seconds else "")
+        ((str(days) + " Hari, ") if days else "")
+        + ((str(hours) + " Jam, ") if hours else "")
+        + ((str(minutes) + " Menit, ") if minutes else "")
+        + ((str(seconds) + " Detik, ") if seconds else "")
         + ((str(milliseconds) + " ms, ") if milliseconds else "")
     )
     return tmp[:-2]
@@ -174,14 +174,14 @@ def airing(update: Update, context: CallbackContext):
     search_str = extract_arg(message)
     if not search_str:
         update.effective_message.reply_text(
-            "Tell Anime Name :) ( /airing <anime name>)",
+            "Beritahu Nama Anime :) ( /ditayangkan <anime name>)",
         )
         return
     variables = {"search": search_str}
     response = requests.post(
         url, json={"query": airing_query, "variables": variables},
     ).json()["data"]["Media"]
-    msg = f"*Name*: *{response['title']['romaji']}*(`{response['title']['native']}`)\n*ID*: `{response['id']}`"
+    msg = f"*Nama*: *{response['title']['romaji']}*(`{response['title']['native']}`)\n*ID*: `{response['id']}`"
     if response["nextAiringEpisode"]:
         time = response["nextAiringEpisode"]["timeUntilAiring"] * 1000
         time = t(time)
