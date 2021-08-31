@@ -14,6 +14,7 @@ from telegram.ext import CommandHandler, CallbackQueryHandler
 from wserver import start_server_async
 from bot import bot, dispatcher, updater, botStartTime, OWNER_ID, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT, IMAGE_URL
 from bot.helper.ext_utils import fs_utils
+from bot.helper.ext_utils.stats import stats_callback
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
@@ -55,6 +56,10 @@ buttons += [
         ),
         InlineKeyboardButton(
             text="Support Channel 🧲", url="https://t.me/KenzoMcWnews"
+        ),
+        InlineKeyboardButton(
+            text="System Stats 🖥",
+            callback_data="stats_callback"
         ),
     ]
 ]

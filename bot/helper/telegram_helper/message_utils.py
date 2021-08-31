@@ -157,7 +157,7 @@ def sendStatusMessage(msg, bot):
                 del status_reply_dict[msg.message.chat.id]
                 pass
         if buttons == "":
-            message = sendMarkup(progress, bot, msg, reply_markup)
+            message = sendMessage(progress, bot, msg, reply_markup)
         else:
             message = sendMarkup(progress, bot, msg, buttons, reply_markup)
         status_reply_dict[msg.message.chat.id] = message
