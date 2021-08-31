@@ -2,12 +2,12 @@ import os
 import time
 
 import psutil
-from bot import app, bot_start_time
+from bot import app, botStartTime
 from bot.helper.ext_utils import form, formatter
 from pyrogram import filters
 
 async def bot_sys_stats():
-    bot_uptime = int(time.time() - bot_start_time)
+    bot_uptime = int(time.time() - botStartTime)
     cpu = psutil.cpu_percent()
     mem = psutil.virtual_memory().percent
     disk = psutil.disk_usage("/").percent
