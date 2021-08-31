@@ -45,16 +45,10 @@ class MirrorListener(listeners.MirrorListeners):
         self.isQbit = isQbit
         self.pswd = pswd
 
-    def onDownloadStarted(self, link: str):
-        with download_dict_lock:
-         msg = f'Download dimulai COK'
-         msg += f'nano'
+    def onDownloadStarted(self):
         pass
 
-    def onDownloadProgress(self, link: str):
-        with download_dict_lock:
-         msg = f'Download dimulai COK'
-         msg += f'nano'# We are handling this on our own!
+    def onDownloadProgress(self):
         pass
 
     def clean(self):

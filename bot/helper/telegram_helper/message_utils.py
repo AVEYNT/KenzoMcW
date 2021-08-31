@@ -7,6 +7,7 @@ from bot import AUTO_DELETE_MESSAGE_DURATION, LOGGER, bot, \
     status_reply_dict, status_reply_dict_lock, download_dict, download_dict_lock, botStartTime, Interval, DOWNLOAD_STATUS_UPDATE_INTERVAL
 from bot.helper.ext_utils.bot_utils import get_readable_message, get_readable_file_size, get_readable_time, MirrorStatus, setInterval
 from telegram.error import TimedOut, BadRequest
+from bot.helper.telegram_helper import button_build
 
 
 def sendMessage(text: str, bot, update: Update):
@@ -94,14 +95,18 @@ def update_all_messages():
         dlspeed = get_readable_file_size(dlspeed_bytes)
         ulspeed = get_readable_file_size(uldl_bytes)
         msg += f"\n<b>FREE:</b> <code>{free}</code> | <b>UPTIME:</b> <code>{currentTime}</code>\n<b>DL:</b> <code>{dlspeed}/s</code> 🔻 | <b>UL:</b> <code>{ulspeed}/s</code> 🔺\n"
+        button = button_build.ButtonMaker()
+        button.buildbutton("Repo", "https://github.com/SlamDevs/slam-mirrorbot")
+        button.buildbutton("Channel", "https://t.me/SlamMirrorUpdates")
+        reply_markup = InlineKeyboardMarkup(button.build_menu(2))
     with status_reply_dict_lock:
         for chat_id in list(status_reply_dict.keys()):
             if status_reply_dict[chat_id] and msg != status_reply_dict[chat_id].text:
                 try:
                     if buttons == "":
-                        editMessage(msg, status_reply_dict[chat_id])
+                        editMessage(msg, reply_markup, status_reply_dict[chat_id])
                     else:
-                        editMessage(msg, status_reply_dict[chat_id], buttons)
+                        editMessage(msg, reply_markup, status_reply_dict[chat_id], buttons)
                 except Exception as e:
                     LOGGER.error(str(e))
                 status_reply_dict[chat_id].text = msg
@@ -137,6 +142,10 @@ def sendStatusMessage(msg, bot):
         dlspeed = get_readable_file_size(dlspeed_bytes)
         ulspeed = get_readable_file_size(uldl_bytes)
         progress += f"\n<b>FREE:</b> <code>{free}</code> | <b>UPTIME:</b> <code>{currentTime}</code>\n<b>DL:</b> <code>{dlspeed}/s</code> 🔻 | <b>UL:</b> <code>{ulspeed}/s</code> 🔺\n"
+        button = button_build.ButtonMaker()
+        button.buildbutton("Repo", "https://github.com/SlamDevs/slam-mirrorbot")
+        button.buildbutton("Channel", "https://t.me/SlamMirrorUpdates")
+        reply_markup = InlineKeyboardMarkup(button.build_menu(2))
     with status_reply_dict_lock:
         if msg.message.chat.id in list(status_reply_dict.keys()):
             try:
@@ -148,7 +157,7 @@ def sendStatusMessage(msg, bot):
                 del status_reply_dict[msg.message.chat.id]
                 pass
         if buttons == "":
-            message = sendMessage(progress, bot, msg)
+            message = sendMarkup(progress, bot, msg, reply_markup)
         else:
-            message = sendMarkup(progress, bot, msg, buttons)
+            message = sendMarkup(progress, bot, msg, buttons, reply_markup)
         status_reply_dict[msg.message.chat.id] = message
