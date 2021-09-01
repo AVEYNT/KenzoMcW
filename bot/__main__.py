@@ -110,7 +110,7 @@ for module_name in ALL_MODULES:
     if not hasattr(imported_module, "__mod_name__"):
         imported_module.__mod_name__ = imported_module.__name__
 
-    if not imported_module.__mod_name__.lower() in IMPORTED:
+    if imported_module.__mod_name__.lower() not in IMPORTED:
         IMPORTED[imported_module.__mod_name__.lower()] = imported_module
     else:
         raise Exception(
@@ -132,18 +132,19 @@ async def bot_sys_stats():
     cpuUsage = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    stats = f'<b>AVEYUBOT by AVEYNATA</b>\n' \
-            f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n' \
-            f'<b>Bot:</b> <code>{round(process.memory_info()[0] / 1024 ** 2)} MB</code>\n' \
-            f'<b>Total Disk Space:</b> <code>{total}</code>\n' \
-            f'<b>Used:</b> <code>{used}</code> ' \
-            f'<b>Free:</b> <code>{free}</code>\n\n' \
-            f'<b>Upload:</b> <code>{sent}</code>\n' \
-            f'<b>Download:</b> <code>{recv}</code>\n\n' \
-            f'<b>CPU:</b> <code>{cpuUsage}%</code> ' \
-            f'<b>RAM:</b> <code>{memory}%</code> ' \
-            f'<b>DISK:</b> <code>{disk}%</code>'
-    return stats
+    return (
+        f'<b>AVEYUBOT by AVEYNATA</b>\n'
+        f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n'
+        f'<b>Bot:</b> <code>{round(process.memory_info()[0] / 1024 ** 2)} MB</code>\n'
+        f'<b>Total Disk Space:</b> <code>{total}</code>\n'
+        f'<b>Used:</b> <code>{used}</code> '
+        f'<b>Free:</b> <code>{free}</code>\n\n'
+        f'<b>Upload:</b> <code>{sent}</code>\n'
+        f'<b>Download:</b> <code>{recv}</code>\n\n'
+        f'<b>CPU:</b> <code>{cpuUsage}%</code> '
+        f'<b>RAM:</b> <code>{memory}%</code> '
+        f'<b>DISK:</b> <code>{disk}%</code>'
+    )
 
 buttons += [
     [
@@ -159,9 +160,7 @@ def stats(update, context):
     buttonss.sbutton("System Stats 🖥", "stats_callback")
     reply_markup = InlineKeyboardMarkup(buttonss.build_menu)
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
-        start_string = f'''
-Tekan tombol dibawah untuk melihat statistik bot
-'''
+        start_string = '\x1fTekan tombol dibawah untuk melihat statistik bot\x1f'
         sendMarkup(start_string, context.bot, update, reply_markup)
     else:
         sendMarkup(
@@ -333,13 +332,11 @@ def help_button(update, context):
         # ensure no spinny white circle
         context.bot.answer_callback_query(query.id)
     except Exception as excp:
-        if excp.message == "Message is not modified":
-            pass
-        elif excp.message == "Query_id_invalid":
-            pass
-        elif excp.message == "Message can't be deleted":
-            pass
-        else:
+        if excp.message not in [
+            "Message is not modified",
+            "Query_id_invalid",
+            "Message can't be deleted",
+        ]:
             query.message.edit_text(excp.message)
             LOGGER.exception("Exception in help buttons. %s", str(query.data))
 
