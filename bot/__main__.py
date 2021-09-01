@@ -14,7 +14,6 @@ from telegram.ext import CommandHandler, CallbackQueryHandler
 from wserver import start_server_async
 from bot import bot, dispatcher, updater, botStartTime, OWNER_ID, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT, IMAGE_URL
 from bot.helper.ext_utils import fs_utils
-from bot.helper.ext_utils.stats import bot_sys_stats
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
@@ -60,14 +59,6 @@ buttons += [
     ]
 ]
 
-buttons += [
-    [
-        InlineKeyboardButton(
-            text="System Stats 🖥",
-            callback_data="stats_callback"
-        ),
-    ]
-]
 
 keyby = [
     [
@@ -129,6 +120,39 @@ for module_name in ALL_MODULES:
     if hasattr(imported_module, "__help__") and imported_module.__help__:
         HELPABLE[imported_module.__mod_name__.lower()] = imported_module
 
+async def bot_sys_stats():
+    currentTime = get_readable_time(time.time() - botStartTime)
+    total, used, free = shutil.disk_usage('.')
+    total = get_readable_file_size(total)
+    used = get_readable_file_size(used)
+    free = get_readable_file_size(free)
+    sent = get_readable_file_size(psutil.net_io_counters().bytes_sent)
+    recv = get_readable_file_size(psutil.net_io_counters().bytes_recv)
+    process = psutil.Process(os.getpid())
+    cpuUsage = psutil.cpu_percent(interval=0.5)
+    memory = psutil.virtual_memory().percent
+    disk = psutil.disk_usage('/').percent
+    stats = f'<b>AVEYUBOT by AVEYNATA</b>\n' \
+            f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n' \
+            f'<b>Bot:</b> <code>{round(process.memory_info()[0] / 1024 ** 2)} MB</code>\n' \
+            f'<b>Total Disk Space:</b> <code>{total}</code>\n' \
+            f'<b>Used:</b> <code>{used}</code> ' \
+            f'<b>Free:</b> <code>{free}</code>\n\n' \
+            f'<b>Upload:</b> <code>{sent}</code>\n' \
+            f'<b>Download:</b> <code>{recv}</code>\n\n' \
+            f'<b>CPU:</b> <code>{cpuUsage}%</code> ' \
+            f'<b>RAM:</b> <code>{memory}%</code> ' \
+            f'<b>DISK:</b> <code>{disk}%</code>'
+    return stats
+
+buttons += [
+    [
+        InlineKeyboardButton(
+            text="System Stats 🖥",
+            callback_data="stats_callback"
+        ),
+    ]
+]
 
 def stats(update, context):
     buttonss = button_build.ButtonMaker()
