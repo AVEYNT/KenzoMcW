@@ -71,7 +71,7 @@ def update_all_messages():
     total, used, free = shutil.disk_usage('.')
     free = get_readable_file_size(free)
     currentTime = get_readable_time(time.time() - botStartTime)
-    msg, buttons = get_readable_message()
+    msg, reply_markup, buttons = get_readable_message()
     if msg is None:
         return
     msg += f"<b>CPU:</b> <code>{psutil.cpu_percent()}%</code>" \
@@ -104,9 +104,9 @@ def update_all_messages():
             if status_reply_dict[chat_id] and msg != status_reply_dict[chat_id].text:
                 try:
                     if buttons == "":
-                        editMessage(msg, reply_markup, status_reply_dict[chat_id])
+                        editMessage(msg, status_reply_dict[chat_id])
                     else:
-                        editMessage(msg, reply_markup, status_reply_dict[chat_id], buttons)
+                        editMessage(msg, status_reply_dict[chat_id], buttons)
                 except Exception as e:
                     LOGGER.error(str(e))
                 status_reply_dict[chat_id].text = msg

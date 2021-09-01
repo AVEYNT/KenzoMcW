@@ -57,6 +57,11 @@ buttons += [
         InlineKeyboardButton(
             text="Support Channel 🧲", url="https://t.me/KenzoMcWnews"
         ),
+    ]
+]
+
+buttons += [
+    [
         InlineKeyboardButton(
             text="System Stats 🖥",
             callback_data="stats_callback"
@@ -64,6 +69,14 @@ buttons += [
     ]
 ]
 
+keyby = [
+    [
+        InlineKeyboardButton(
+            text="System Stats 🖥",
+            callback_data="stats_callback"
+        ),
+    ]
+]
 
 
 HELP_STRINGS = f"""
@@ -118,27 +131,21 @@ for module_name in ALL_MODULES:
 
 
 def stats(update, context):
-    currentTime = get_readable_time(time.time() - botStartTime)
-    total, used, free = shutil.disk_usage('.')
-    total = get_readable_file_size(total)
-    used = get_readable_file_size(used)
-    free = get_readable_file_size(free)
-    sent = get_readable_file_size(psutil.net_io_counters().bytes_sent)
-    recv = get_readable_file_size(psutil.net_io_counters().bytes_recv)
-    cpuUsage = psutil.cpu_percent(interval=0.5)
-    memory = psutil.virtual_memory().percent
-    disk = psutil.disk_usage('/').percent
-    stats = f'<b>Bot Uptime:</b> {currentTime}\n' \
-            f'<b>Total Disk Space:</b> {total}\n' \
-            f'<b>Used:</b> {used}  ' \
-            f'<b>Free:</b> {free}\n\n' \
-            f'📊Data Usage\n<b>Upload:</b> {sent}\n' \
-            f'<b>Download:</b> {recv}\n\n' \
-            f'<b>CPU:</b> {cpuUsage}%\n' \
-            f'<b>RAM:</b> {memory}%\n' \
-            f'<b>DISK:</b> {disk}%'
-    update.effective_message.reply_photo(IMAGE_URL, stats, parse_mode=ParseMode.HTML)
-
+    buttonss = button_build.ButtonMaker()
+    buttonss.sbutton("System Stats 🖥", "stats_callback")
+    reply_markup = InlineKeyboardMarkup(buttonss.build_menu)
+    if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
+        start_string = f'''
+Tekan tombol dibawah untuk melihat statistik bot
+'''
+        sendMarkup(start_string, context.bot, update, reply_markup)
+    else:
+        sendMarkup(
+            'Ups!Bukan pengguna yang berwenang.\nSilakan buat sendiri<b>avey projectbot</b>.',
+            context.bot,
+            update,
+            reply_markup,
+        )
 
 # do not async
 def send_help(chat_id, text, keyboard=None):
