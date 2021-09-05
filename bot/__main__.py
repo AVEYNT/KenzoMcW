@@ -54,7 +54,15 @@ buttons += [
             url=f"t.me/{dispatcher.bot.username}?start=help",
         ),
         InlineKeyboardButton(
-            text="Support Channel 🧲", url="https://t.me/KenzoMcWnews"
+            text="Support Channel 🧲", url="https://t.me/AVEYPROJECT"
+        ),
+    ]
+]
+
+kyby = [
+    [
+        InlineKeyboardButton(
+            text="Support Channel 🧲", url="https://t.me/AVEYPROJECT"
         ),
     ]
 ]
@@ -198,7 +206,10 @@ def start(update, context):
             )
     else:
          update.effective_message.reply_text(
-            "Edotensei success!!!✨, /help di pm anjing!!!🗿"
+            "Edotensei success!!!✨, /help di PM Sloer!!!🗿",
+            reply_markup=InlineKeyboardMarkup(kyby),
+            parse_mode=ParseMode.MARKDOWN,
+            timeout=60
         )
 
 def restart(update, context):
@@ -340,7 +351,7 @@ def get_help(update, context):
     if chat.type != chat.PRIVATE:
 
         update.effective_message.reply_text(
-            "Use this command in private chat bitch, motherfucker.",
+            "Gunakan /help di personal cahtt Sloer.",
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
