@@ -1,4 +1,4 @@
-FROM aveynata13/kangnipispython:latest
+FROM breakdowns/mega-sdk-python:latest
 
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app

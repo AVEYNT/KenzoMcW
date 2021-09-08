@@ -1,9 +1,8 @@
 aiohttp
 anytree
 aria2p
-attrdict
 appdirs
-bs4
+attrdict
 beautifulsoup4
 cloudscrape
 feedparser
@@ -13,12 +12,9 @@ google-auth-httplib2
 google-auth-oauthlib
 gunicorn
 heroku3
-hurry.filesize
 js2py
 lk21
-jikanpy
 lxml
-pillow
 psutil
 psycopg2-binary
 pybase64
