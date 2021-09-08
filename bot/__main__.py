@@ -2,22 +2,122 @@ import shutil, psutil
 import signal
 import os
 import asyncio
+import importlib
+import re
 
 from pyrogram import idle
 from bot import app, alive
 from sys import executable
 
-from telegram import ParseMode
-from telegram.ext import CommandHandler
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CommandHandler, CallbackQueryHandler
 from wserver import start_server_async
-from bot import bot, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT
+from bot import bot, dispatcher, updater, botStartTime, OWNER_ID, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT, IMAGE_URL
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, torrent_search, delete, speedtest, count, reboot
+from bot.modules import ALL_MODULES
+from bot.helper.misc import paginate_modules
+
+PM_START_TEXT = f"""
+Hello, I am *{dispatcher.bot.first_name}*.
+Any questions on how to use me? use /help
+Join Our [Group](https://t.me/KenzoMcW) If You wanna Report Issue!
+I have lots of handy features ️ such as :
+❖ 🔗 Mirror      ❖ 🇯🇵 Anime
+❖ 🧲 Torrent    ❖ 📱Android
+❖ 🎞 VideoDL  ❖ 🗜 Unpack
+        ❖And many more❖
+Developer fork [Kenzo McW](https://t.me/KenzoMcWnews)
+Wanna Add me to your Group? Ask for access first!
+"""
+
+buttons = [
+    [
+        InlineKeyboardButton(
+            text="Add to Group 👥", url="t.me/userbotindobot?startgroup=true"
+        ),
+        InlineKeyboardButton(
+            text="Credits 💰", url="https://github.com/SlamDevs/slam-mirrorbot/graphs/contributors"
+        ),
+    ]
+]
+
+
+buttons += [
+    [
+        InlineKeyboardButton(
+            text="Command Set⚙️",
+            url=f"t.me/{dispatcher.bot.username}?start=help",
+        ),
+        InlineKeyboardButton(
+            text="Support Channel 🧲", url="https://t.me/AVEYPROJECT"
+        ),
+    ]
+]
+
+kyby = [
+    [
+        InlineKeyboardButton(
+            text="Support Channel 🧲", url="https://t.me/AVEYPROJECT"
+        ),
+    ]
+]
+
+
+
+HELP_STRINGS = f"""
+Hello, I am *{dispatcher.bot.first_name}*.
+*Main* commands available:
+ ❖ /start: Starts me, can be used to check i'm alive or no...
+ ❖ /help: PM's you this message.
+  \nClick on the buttons below to get documentation about specific modules!"""
+
+
+STAFF_HELP_STRINGS = """
+┎─────┨ 👤 Owner ┠────┒
+│ ❖ /auth : izinkan  group
+│ ❖ /unauth : cabut izin group
+│ ❖ /users : izinkan orang
+│ ❖ /addsudo : add sudo
+│ ❖ /rmsudo : remove sudo
+│ ❖ /log : log file bot
+│ ❖ /config : info bot config
+│ ❖ /specs : stats server
+│ ❖ /del : delete files by links
+│ ❖ /update : update bot
+│ ❖ /term : terminal commands
+│ ❖ /eval : run Python Code Lines
+│ ❖ /exec : run Commands In Exec
+│ ❖ /clearlocals : Cleared locals
+│ ❖ /life : check life of bot
+│ ❖ /exechelp : executor help
+┖──────────────────┚
+"""
+
+IMPORTED = {}
+HELPABLE = {}
+
+
+for module_name in ALL_MODULES:
+    imported_module = importlib.import_module(
+        "bot.modules." + module_name
+    )
+    if not hasattr(imported_module, "__mod_name__"):
+        imported_module.__mod_name__ = imported_module.__name__
+
+    if not imported_module.__mod_name__.lower() in IMPORTED:
+        IMPORTED[imported_module.__mod_name__.lower()] = imported_module
+    else:
+        raise Exception(
+            "Can't have two modules with the same name! Please change one"
+        )
+
+    if hasattr(imported_module, "__help__") and imported_module.__help__:
+        HELPABLE[imported_module.__mod_name__.lower()] = imported_module
 
 
 def stats(update, context):
@@ -31,37 +131,87 @@ def stats(update, context):
     cpuUsage = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    stats = f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n' \
-            f'<b>Total Disk Space:</b> <code>{total}</code>\n' \
-            f'<b>Used:</b> <code>{used}</code> ' \
-            f'<b>Free:</b> <code>{free}</code>\n\n' \
-            f'<b>Upload:</b> <code>{sent}</code>\n' \
-            f'<b>Download:</b> <code>{recv}</code>\n\n' \
-            f'<b>CPU:</b> <code>{cpuUsage}%</code> ' \
-            f'<b>RAM:</b> <code>{memory}%</code> ' \
-            f'<b>DISK:</b> <code>{disk}%</code>'
-    sendMessage(stats, context.bot, update)
+    stats = f'<b>Bot Uptime:</b> {currentTime}\n' \
+            f'<b>Total Disk Space:</b> {total}\n' \
+            f'<b>Used:</b> {used}  ' \
+            f'<b>Free:</b> {free}\n\n' \
+            f'📊Data Usage\n<b>Upload:</b> {sent}\n' \
+            f'<b>Download:</b> {recv}\n\n' \
+            f'<b>CPU:</b> {cpuUsage}%\n' \
+            f'<b>RAM:</b> {memory}%\n' \
+            f'<b>DISK:</b> {disk}%'
+    update.effective_message.reply_photo(IMAGE_URL, stats, parse_mode=ParseMode.HTML)
+
+
+# do not async
+def send_help(chat_id, text, keyboard=None):
+    if not keyboard:
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
+    dispatcher.bot.send_message(
+        chat_id=chat_id,
+        text=text,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=keyboard,
+    )
 
 
 def start(update, context):
-    buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Repo", "https://github.com/SlamDevs/slam-mirrorbot")
-    buttons.buildbutton("Channel", "https://t.me/SlamMirrorUpdates")
-    reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
-    if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
-        start_string = f'''
-This bot can mirror all your links to Google Drive!
-Type /{BotCommands.HelpCommand} to get a list of available commands
-'''
-        sendMarkup(start_string, context.bot, update, reply_markup)
-    else:
-        sendMarkup(
-            'Oops! not a Authorized user.\nPlease deploy your own <b>slam-mirrorbot</b>.',
-            context.bot,
-            update,
-            reply_markup,
-        )
+    if update.effective_chat.type == "private":
+        args = context.args
+        if len(args) >= 1:
+            if args[0].lower() == "help":
+                user = update.effective_user
+                keyb = paginate_modules(0, HELPABLE, "help")
 
+                if (
+                    user.id == OWNER_ID
+                ):
+                    keyb += [
+                        [
+                            InlineKeyboardButton(
+                                text="👤Owner", callback_data="help_staff"
+                            )
+                        ]
+                    ]
+
+                send_help(
+                    update.effective_chat.id,
+                    HELP_STRINGS,
+                    InlineKeyboardMarkup(keyb),
+                )
+
+            elif args[0].lower().startswith("stngs_"):
+                match = re.match("stngs_(.*)", args[0].lower())
+                chat = dispatcher.bot.getChat(match.group(1))
+
+                if is_user_admin(chat, update.effective_user.id):
+                    send_settings(
+                        match.group(1), update.effective_user.id, False
+                    )
+                else:
+                    send_settings(
+                        match.group(1), update.effective_user.id, True
+                    )
+
+            elif args[0][1:].isdigit() and "rules" in IMPORTED:
+                IMPORTED["rules"].send_rules(update, args[0], from_pm=True)
+
+        else:
+            update.effective_message.reply_photo(
+                IMAGE_URL,
+                PM_START_TEXT,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.MARKDOWN,
+                timeout=60,
+            )
+    else:
+         update.effective_message.reply_photo(
+             IMAGE_URL,
+            "Edotensei success!!!✨, /help di PM Sloer!!!🗿",
+            reply_markup=InlineKeyboardMarkup(kyby),
+            parse_mode=ParseMode.MARKDOWN,
+            timeout=60
+        )
 
 def restart(update, context):
     restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
@@ -85,100 +235,176 @@ def log(update, context):
     sendLogFile(context.bot, update)
 
 
-def bot_help(update, context):
-    help_string_adm = f'''
-/{BotCommands.HelpCommand}: To get this message
+def help_button(update, context):
+    query = update.callback_query
+    user = update.effective_user
+    mod_match = re.match(r"help_module\((.+?)\)", query.data)
+    staff_match = re.match(r"help_staff", query.data)
+    back_match = re.match(r"help_back", query.data)
+    try:
+        if mod_match:
+            module = mod_match.group(1)
+            text = (
+                "Here is the help for the *{}* module:\n".format(
+                    HELPABLE[module].__mod_name__
+                )
+                + HELPABLE[module].__help__
+            )
+            query.message.edit_text(
+                text=text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text="⬅️ Back", callback_data="help_back"
+                            )
+                        ]
+                    ]
+                ),
+            )
 
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
+        elif staff_match:
+            query.message.edit_text(
+                text=STAFF_HELP_STRINGS,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text="⬅️ Back", callback_data="help_back"
+                            )
+                        ]
+                    ]
+                ),
+            )
 
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
+        elif back_match:
+            keyb = paginate_modules(0, HELPABLE, "help")
+            # Add aditional button if staff user detected
+            if (
+                user.id == OWNER_ID
+            ):
+                keyb += [
+                    [
+                        InlineKeyboardButton(
+                            text="👤Owner", callback_data="help_staff"
+                        )
+                    ]
+                ]
 
-/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
+            query.message.edit_text(
+                text=HELP_STRINGS,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(keyb),
+            )
 
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
+        # ensure no spinny white circle
+        context.bot.answer_callback_query(query.id)
+    except Exception as excp:
+        if excp.message == "Message is not modified":
+            pass
+        elif excp.message == "Query_id_invalid":
+            pass
+        elif excp.message == "Message can't be deleted":
+            pass
+        else:
+            query.message.edit_text(excp.message)
+            LOGGER.exception("Exception in help buttons. %s", str(query.data))
 
-/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive
 
-/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive Links
+def staff_help(update, context):
+    chat = update.effective_chat
+    user = update.effective_user
 
-/{BotCommands.DeleteCommand} [drive_url]: Delete file from Google Drive (Only Owner & Sudo)
+    if chat.type != chat.PRIVATE:
+        update.effective_message.reply_text(
+            "Contact me in PM to get the list of staff's command"
+        )
+        return
 
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help
-
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
-
-/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
-
-/{BotCommands.CancelAllCommand}: Cancel all running tasks
-
-/{BotCommands.ListCommand} [search term]: Searches the search term in the Google Drive, If found replies with the link
-
-/{BotCommands.StatusCommand}: Shows a status of all the downloads
-
-/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
-
-/{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
-
-/{BotCommands.AuthorizeCommand}: Authorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-
-/{BotCommands.UnAuthorizeCommand}: Unauthorize a chat or a user to use the bot (Can only be invoked by Owner & Sudo of the bot)
-
-/{BotCommands.AuthorizedUsersCommand}: Show authorized users (Only Owner & Sudo)
-
-/{BotCommands.AddSudoCommand}: Add sudo user (Only Owner)
-
-/{BotCommands.RmSudoCommand}: Remove sudo users (Only Owner)
-
-/{BotCommands.RestartCommand}: Restart the bot
-
-/{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports
-
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-
-/{BotCommands.ShellCommand}: Run commands in Shell (Terminal)
-
-/{BotCommands.ExecHelpCommand}: Get help for Executor module (Only Owner)
-
-/{BotCommands.TsHelpCommand}: Get help for Torrent search module
-'''
-
-    help_string = f'''
-/{BotCommands.HelpCommand}: To get this message
-
-/{BotCommands.MirrorCommand} [download_url][magnet_link]: Start mirroring the link to Google Drive. Use /{BotCommands.MirrorCommand} qb to mirror with qBittorrent, and use /{BotCommands.MirrorCommand} qbs to select files before downloading
-
-/{BotCommands.TarMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.tar) version of the download
-
-/{BotCommands.ZipMirrorCommand} [download_url][magnet_link]: Start mirroring and upload the archived (.zip) version of the download
-
-/{BotCommands.UnzipMirrorCommand} [download_url][magnet_link]: Starts mirroring and if downloaded file is any archive, extracts it to Google Drive
-
-/{BotCommands.CloneCommand} [drive_url]: Copy file/folder to Google Drive
-
-/{BotCommands.CountCommand} [drive_url]: Count file/folder of Google Drive Links
-
-/{BotCommands.WatchCommand} [youtube-dl supported link]: Mirror through youtube-dl. Click /{BotCommands.WatchCommand} for more help
-
-/{BotCommands.TarWatchCommand} [youtube-dl supported link]: Mirror through youtube-dl and tar before uploading
-
-/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
-
-/{BotCommands.ListCommand} [search term]: Searches the search term in the Google Drive, If found replies with the link
-
-/{BotCommands.StatusCommand}: Shows a status of all the downloads
-
-/{BotCommands.StatsCommand}: Show Stats of the machine the bot is hosted on
-
-/{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
-
-/{BotCommands.TsHelpCommand}: Get help for Torrent search module
-'''
-
-    if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
-        sendMessage(help_string_adm, context.bot, update)
+    if (
+        user.id == OWNER_ID
+    ):
+        update.effective_message.reply_text(
+            text=STAFF_HELP_STRINGS,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Modules help", callback_data="help_back"
+                        )
+                    ]
+                ]
+            ),
+        )
     else:
-        sendMessage(help_string, context.bot, update)
+        update.effective_message.reply_text("You can't access this command")
 
+
+def get_help(update, context):
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user
+    args = update.effective_message.text.split(None, 1)
+
+    # ONLY send help in PM
+    if chat.type != chat.PRIVATE:
+
+        update.effective_message.reply_text(
+            "Gunakan /help di personal cahtt Sloer.",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="⚙️Help",
+                            url="t.me/{}?start=help".format(
+                                context.bot.username
+                            ),
+                        )
+                    ]
+                ]
+            ),
+        )
+        return
+
+    elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
+        module = args[1].lower()
+        text = (
+            "Here is the available help for the *{}* module:\n".format(
+                HELPABLE[module].__mod_name__
+            )
+            + HELPABLE[module].__help__
+        )
+        send_help(
+            chat.id,
+            text,
+            InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Back", callback_data="help_back"
+                        )
+                    ]
+                ]
+            ),
+        )
+
+    else:
+        keyb = paginate_modules(0, HELPABLE, "help")
+        # Add aditional button if staff user detected
+        if (
+            user.id == OWNER_ID
+        ):
+            keyb += [
+                [
+                    InlineKeyboardButton(
+                        text="👤Owner", callback_data="help_staff"
+                    )
+                ]
+            ]
+
+        send_help(chat.id, HELP_STRINGS, InlineKeyboardMarkup(keyb))
 
 botcmds = [
         (f'{BotCommands.HelpCommand}','Get Detailed Help'),
@@ -198,8 +424,7 @@ botcmds = [
         (f'{BotCommands.StatsCommand}','Bot Usage Stats'),
         (f'{BotCommands.PingCommand}','Ping the Bot'),
         (f'{BotCommands.RestartCommand}','Restart the bot [owner/sudo only]'),
-        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]'),
-        (f'{BotCommands.TsHelpCommand}','Get help for Torrent search module')
+        (f'{BotCommands.LogCommand}','Get the Bot Log [owner/sudo only]')
     ]
 
 
@@ -222,8 +447,12 @@ def main():
                                   filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
     restart_handler = CommandHandler(BotCommands.RestartCommand, restart,
                                      filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
-    help_handler = CommandHandler(BotCommands.HelpCommand,
-                                  bot_help, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+    help_handler = CommandHandler(BotCommands.HelpCommand, get_help)
+    help_callback_handler = CallbackQueryHandler(
+        help_button, pattern=r"help_", run_async=True
+    )
+    help_staff_handler = CommandHandler("staffhelp", staff_help,
+        filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
     stats_handler = CommandHandler(BotCommands.StatsCommand,
                                    stats, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
     log_handler = CommandHandler(BotCommands.LogCommand, log, filters=CustomFilters.owner_filter | CustomFilters.sudo_user, run_async=True)
@@ -231,6 +460,8 @@ def main():
     dispatcher.add_handler(ping_handler)
     dispatcher.add_handler(restart_handler)
     dispatcher.add_handler(help_handler)
+    dispatcher.add_handler(help_callback_handler)
+    dispatcher.add_handler(help_staff_handler)
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
