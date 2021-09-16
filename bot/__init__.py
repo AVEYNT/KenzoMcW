@@ -23,7 +23,6 @@ import random
 import string
 import subprocess
 import requests
-from telethon import TelegramClient
 
 import aria2p
 import qbittorrentapi as qba
@@ -31,6 +30,7 @@ import telegram.ext as tg
 from dotenv import load_dotenv
 from pyrogram import Client
 from telegraph import Telegraph
+from telethon import TelegramClient
 
 import psycopg2
 from psycopg2 import Error
@@ -193,7 +193,7 @@ try:
     URL = os.environ.get("URL", "")
     PORT = int(os.environ.get("PORT", 5000))
     CERT_PATH = os.environ.get("CERT_PATH") or None
-    DB_URI = os.environ.get("DATABASE_URL")
+    DB_URY = os.environ.get("DB_URL")
     MONGO_URI = os.environ.get("MONGO_DB_URI")
     DONATION_LINK = os.environ.get("DONATION_LINK") or None
     LOAD = os.environ.get("LOAD", "").split()
