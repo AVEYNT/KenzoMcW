@@ -70,7 +70,6 @@ from bot.helper.telegram_helper import button_build
 # NOTE: Module order is not guaranteed, specify that in the config file!
 from bot.modules import ALL_MODULES
 from bot.modules.helper_funcs.chat_status import is_user_admin
-from bot.modules.helper_funcs.filters import CustomFilters
 from bot.modules.helper_funcs.misc import paginate_modules
 from bot.modules.helper_funcs.alternate import typing_action
 
