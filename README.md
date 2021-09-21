@@ -1,7 +1,7 @@
-##Alpha Release
+# #Alpha Release
 Aria bot mixed with management grub bot
 
-#Many Bugs
+# Many Bugs
 
 # Credits
 
